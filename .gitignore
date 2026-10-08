@@ -1,0 +1,61 @@
+# Local configuration and secrets
+config.local.yaml
+.env
+.env.*
+!.env.example
+
+# Python
+.venv*/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pytest-tmp/
+.test-tmp/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+*.egg-info/
+build/
+dist/
+
+# Runtime state
+.sparse-data/
+artifacts/
+data/
+logs/
+runs/
+vector-indexes/
+*.db
+*.sqlite
+
+# Model and training artifacts
+models/
+antidoom-datasets/
+antidoom-adapters/
+*.gguf
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# Local agent state and internal planning/history
+/.agents/
+/github.md
+/sparsenetwork*.md
+/UIoverhaul.md
+/uitodos.md
+/docs/milestone-*.md
+/docs/admission-*.md
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

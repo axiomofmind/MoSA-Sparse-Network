@@ -1,0 +1,73 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sparse-network"
+version = "0.1.0"
+description = "Portable controller and admission harness for a local sparse model fleet"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = [
+  "fonttools>=4,<5",
+  "huggingface-hub>=0.34,<2",
+  "pillow>=11,<13",
+  "pypdf>=5,<7",
+  "pypdfium2>=4,<6",
+  "psutil>=6.1,<8",
+  "PyYAML>=6.0.2,<7",
+]
+
+[project.scripts]
+sparse-network = "sparse_network.cli:main"
+
+[dependency-groups]
+dev = [
+  "mypy>=1.15,<2",
+  "pillow>=11,<13",
+  "pytest>=8.3,<10",
+  "ruff>=0.9,<1",
+  "types-PyYAML>=6.0.12,<7",
+  "types-psutil>=7.0,<8",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sparse_network"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/config.example.yaml",
+  "/configs",
+  "/dashboard",
+  "/docs/coordination-evaluation.md",
+  "/docs/embeddinggemma2-d1.md",
+  "/docs/task-first-workspace.md",
+  "/LICENSE",
+  "/migrations",
+  "/pyproject.toml",
+  "/README.md",
+  "/schemas",
+  "/scripts",
+  "/src",
+  "/tests",
+  "/THIRD_PARTY_NOTICES.md",
+  "/uv.lock",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --basetemp=.pytest-tmp"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+packages = ["sparse_network"]
+strict = true

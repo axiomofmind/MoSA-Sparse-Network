@@ -1,0 +1,41 @@
+# Copy this file to config.local.yaml and edit only local machine details.
+# config.local.yaml is intentionally ignored by Git.
+
+paths:
+  model_cache: null
+  artifacts: .sparse-data/artifacts
+  logs: .sparse-data/logs
+  runs: .sparse-data/runs
+  indexes: .sparse-data/indexes
+
+runtime_executables:
+  llama_cpp: llama-server
+  transformers: python
+  embeddings: python
+  # Use the isolated CUDA environment created by scripts/setup_decisions.ps1.
+  decisions: python
+  # Optional: needed only when a PDF input requests page rendering.
+  pdf_renderer: pdftoppm
+
+endpoint_overrides:
+  qwen35-4b:
+    environment: {}
+    telemetry_gpu_index: null
+  # For a manually downloaded file outside the normal Hugging Face snapshot
+  # layout, keep the absolute path only in this ignored local configuration:
+  # qwen38-27b-q4:
+  #   source:
+  #     type: local
+  #     repository: null
+  #     revision: sha256:<published-sha256>
+  #     base_path: models/qwen38-q4
+  #     files:
+  #       model: Qwen3.8-27B-UD-Q4_K_M.gguf
+  #     hashes:
+  #       model: <published-sha256>
+
+# The controller rejects use-case files and working directories outside these
+# roots. Add local repository roots here; do not edit the shared templates.
+use_cases:
+  allowed_source_roots:
+    - .

@@ -1,0 +1,47 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sparse Network Local Controller API",
+    "version": "1.0.0"
+  },
+  "servers": [{"url": "http://127.0.0.1:8765"}],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {"type": "http", "scheme": "bearer"}
+    }
+  },
+  "paths": {
+    "/v1/health": {"get": {"responses": {"200": {"description": "Healthy"}}}},
+    "/v1/fleet": {"get": {"responses": {"200": {"description": "Fleet status"}}}},
+    "/v1/state": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Reconstructable state"}}}},
+    "/v1/session": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Authenticated role and permissions"}}}},
+    "/v1/events": {"get": {"security": [{"bearerAuth": []}], "parameters": [{"name": "after", "in": "query", "schema": {"type": "integer"}}, {"name": "limit", "in": "query", "schema": {"type": "integer", "maximum": 1000}}], "responses": {"200": {"description": "Bounded SSE replay"}}}},
+    "/v1/requests": {"post": {"security": [{"bearerAuth": []}], "responses": {"202": {"description": "Accepted"}}}},
+    "/v1/requests/{request_id}": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Request status"}}}},
+    "/v1/requests/{request_id}/cancel": {"post": {"security": [{"bearerAuth": []}], "responses": {"202": {"description": "Confirmed cancellation requested"}}}},
+    "/v1/requests/{request_id}/trace": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Request trace"}}}},
+    "/v1/artifacts/{artifact_id}": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Verified artifact metadata without host paths"}}}},
+    "/v1/artifacts/{artifact_id}/content": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Verified artifact content"}}}},
+    "/v1/fleet/operations/{operation}": {"post": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Safe fleet operation"}}}},
+    "/v1/evaluations": {"post": {"security": [{"bearerAuth": []}], "responses": {"201": {"description": "Evaluation created"}}}},
+    "/v1/evaluations/{evaluation_id}": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Evaluation status"}}}},
+    "/v1/antidoom": {"get": {"responses": {"200": {"description": "Runtime and offline training status"}}}},
+    "/v1/dashboard": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Redacted read-only dashboard snapshot"}}}},
+    "/v1/profiles": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Portable profile catalog"}}}},
+    "/v1/profiles/plan": {"post": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Validated profile-switch plan"}}}},
+    "/v1/profiles/apply": {"post": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Confirmed profile switch result"}}}},
+    "/v1/runs/{run_id}": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Redacted immutable run manifest"}}}},
+    "/v1/config": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Validated configuration"}}}, "patch": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Allowlisted update"}}}},
+    "/v1/escalations/qwen38": {"post": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Exclusive large-model escalation"}}}},
+    "/v1/workflows": {"post": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Bounded top-1, top-2, or MoSA result"}}}},
+    "/v1/use-cases": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Versioned use-case template catalog"}}}},
+    "/v1/use-cases/readiness": {"post": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Request-specific required and optional capability readiness"}}}},
+    "/v1/use-cases/runs": {"post": {"security": [{"bearerAuth": []}], "responses": {"202": {"description": "Use-case run accepted"}}}},
+    "/v1/use-cases/runs/{run_id}": {"get": {"security": [{"bearerAuth": []}], "responses": {"200": {"description": "Immutable use-case run"}}}},
+    "/v1/use-cases/runs/{run_id}/corrections": {"post": {"security": [{"bearerAuth": []}], "responses": {"201": {"description": "New immutable reviewed result version"}}}},
+    "/v1/use-cases/runs/{run_id}/exports": {"post": {"security": [{"bearerAuth": []}], "responses": {"201": {"description": "Persisted version-bound report or CSV export"}}}},
+    "/v1/use-cases/runs/{run_id}/cancel": {"post": {"security": [{"bearerAuth": []}], "responses": {"202": {"description": "Confirmed cooperative use-case cancellation"}}}},
+    "/v1/use-cases/runs/{run_id}/replay": {"post": {"security": [{"bearerAuth": []}], "responses": {"201": {"description": "Confirmed idempotent batch replay"}}}},
+    "/v1/use-cases/runs/{run_id}/admission": {"post": {"security": [{"bearerAuth": []}], "responses": {"201": {"description": "Explicit experiment admission decision"}}}}
+  }
+}

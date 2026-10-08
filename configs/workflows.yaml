@@ -1,0 +1,53 @@
+schema: sparse-network-workflow-config.v1
+maximum_stages: 3
+frozen_triggers:
+  - route_ambiguity
+  - deterministic_failure
+  - missing_evidence
+  - model_disagreement
+  - repeated_failure
+  - high_risk
+  - maximum_quality
+  - disputed
+coordination:
+  context_character_limit: 1600
+  continue_after_verified:
+    - route_ambiguity
+    - missing_evidence
+    - model_disagreement
+    - repeated_failure
+    - high_risk
+    - maximum_quality
+    - disputed
+  accept_after_clean_critique:
+    - maximum_quality
+top2:
+  classification: [lfm25-1.2b, nemotron-4b]
+  extraction: [lfm25-1.2b, nemotron-4b]
+  formatting: [lfm25-1.2b, nemotron-4b]
+  rewriting: [lfm25-1.2b, nemotron-4b]
+  general_generation: [qwen35-4b, nemotron-4b]
+  coding_repair: [qwen35-4b, nemotron-4b]
+  tool_planning: [qwen35-4b, nemotron-4b]
+  tool_verification: [nemotron-4b, qwen3-8b-fp8]
+  visual_understanding: [gemma-e2b-vision, nemotron-4b]
+  visual_document_extraction: [gemma-e2b-vision, nemotron-4b]
+  gui_screen_grounding: [gemma-e2b-vision, nemotron-4b]
+  difficult_reasoning: [qwen3-8b-fp8, nemotron-4b]
+  maximum_quality: [qwen3-8b-fp8, nemotron-4b]
+  high_risk: [qwen3-8b-fp8, nemotron-4b]
+mosa:
+  classification: [lfm25-1.2b, nemotron-4b, qwen3-8b-fp8]
+  extraction: [lfm25-1.2b, nemotron-4b, qwen3-8b-fp8]
+  formatting: [lfm25-1.2b, nemotron-4b, qwen3-8b-fp8]
+  rewriting: [lfm25-1.2b, nemotron-4b, qwen3-8b-fp8]
+  general_generation: [qwen35-4b, nemotron-4b, qwen3-8b-fp8]
+  coding_repair: [qwen35-4b, nemotron-4b, qwen3-8b-fp8]
+  tool_planning: [qwen35-4b, nemotron-4b, qwen3-8b-fp8]
+  tool_verification: [nemotron-4b, qwen35-4b, qwen3-8b-fp8]
+  visual_understanding: [gemma-e2b-vision, nemotron-4b, qwen3-8b-fp8]
+  visual_document_extraction: [gemma-e2b-vision, nemotron-4b, qwen3-8b-fp8]
+  gui_screen_grounding: [gemma-e2b-vision, nemotron-4b, qwen3-8b-fp8]
+  difficult_reasoning: [qwen3-8b-fp8, nemotron-4b, qwen35-4b]
+  maximum_quality: [qwen3-8b-fp8, nemotron-4b, qwen35-4b]
+  high_risk: [qwen3-8b-fp8, nemotron-4b, qwen35-4b]

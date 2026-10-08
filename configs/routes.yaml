@@ -1,0 +1,139 @@
+schema: sparse-network-route-config.v1
+
+defaults:
+  lane: general_generation
+  router_score_threshold: 0.70
+  maximum_graph_nodes: 8
+  allowed_tools: [artifact_read, retrieval_search]
+
+macros:
+  classify: classification
+  extract: extraction
+  format: formatting
+  rewrite: rewriting
+  general: general_generation
+  code: coding_repair
+  tools: tool_planning
+  verify: tool_verification
+  vision: visual_understanding
+  document: visual_document_extraction
+  gui: gui_screen_grounding
+  vision-quality: difficult_visual
+  verify-large: large_verification
+  reason: difficult_reasoning
+  audio: audio_transcription
+  quality: maximum_quality
+  disputed: maximum_quality
+  high-risk: high_risk
+
+router_score_lanes:
+  - classification
+  - extraction
+  - formatting
+  - rewriting
+  - general_generation
+  - coding_repair
+  - tool_planning
+  - difficult_reasoning
+
+lanes:
+  classification:
+    endpoint: lfm25-1.2b
+    capability: classification
+    modalities: [text]
+    keywords: [classify, classification, category, label, intent]
+  extraction:
+    endpoint: lfm25-1.2b
+    capability: extraction
+    modalities: [text]
+    keywords: [extract, fields, entities, parse]
+  formatting:
+    endpoint: lfm25-1.2b
+    capability: rewriting
+    modalities: [text]
+    keywords: [format, table, bullet, normalize]
+  rewriting:
+    endpoint: lfm25-1.2b
+    capability: rewriting
+    modalities: [text]
+    keywords: [rewrite, rephrase, shorten, compress]
+  general_generation:
+    endpoint: qwen35-4b
+    fallback_endpoints: [qwen3-8b-fp8]
+    capability: text_generation
+    modalities: [text]
+    keywords: []
+  coding_repair:
+    endpoint: qwen35-4b
+    fallback_endpoints: [qwen3-8b-fp8]
+    capability: coding
+    modalities: [text]
+    keywords: [code, bug, debug, function, python, powershell, compile, repair]
+  tool_planning:
+    endpoint: qwen35-4b
+    capability: tool_planning
+    modalities: [text]
+    keywords: [tool, command, plan, execute]
+  tool_verification:
+    endpoint: nemotron-4b
+    capability: plan_review
+    modalities: [text]
+    keywords: [review plan, verify tool, critique command]
+  visual_understanding:
+    endpoint: gemma-e2b-vision
+    fallback_endpoints: [gemma4-12b-qat]
+    capability: visual_understanding
+    modalities: [text, image]
+    keywords: []
+  visual_document_extraction:
+    endpoint: gemma-e2b-vision
+    fallback_endpoints: [gemma4-12b-qat]
+    capability: document_vision
+    modalities: [text, image]
+    keywords: []
+  gui_screen_grounding:
+    endpoint: gemma-e2b-vision
+    fallback_endpoints: [gemma4-12b-qat]
+    capability: screenshot_analysis
+    modalities: [text, image]
+    keywords: []
+  difficult_visual:
+    endpoint: gemma4-12b-qat
+    fallback_endpoints: [gemma-e2b-vision]
+    capability: visual_understanding
+    modalities: [text, image]
+    keywords: []
+    verification_required: true
+  large_verification:
+    endpoint: gemma4-12b-qat
+    fallback_endpoints: [qwen3-8b-fp8, nemotron-4b]
+    capability: verification
+    modalities: [text]
+    keywords: [large verification, deep verify, second opinion]
+    verification_required: true
+  difficult_reasoning:
+    endpoint: qwen3-8b-fp8
+    fallback_endpoints: [gemma4-12b-qat, nemotron-4b]
+    capability: reasoning
+    modalities: [text]
+    keywords: [reason, reconcile, prove, difficult, complex, compare]
+  audio_transcription:
+    endpoint: null
+    capability: audio_transcription
+    modalities: [text, audio]
+    keywords: [transcribe, transcription, audio]
+  maximum_quality:
+    endpoint: gemma4-12b-qat
+    fallback_endpoints: [qwen3-8b-fp8, nemotron-4b]
+    capability: verification
+    modalities: [text]
+    keywords: [maximum quality, disputed, adjudicate]
+    verification_required: true
+  high_risk:
+    endpoint: gemma4-12b-qat
+    fallback_endpoints: [qwen3-8b-fp8, nemotron-4b]
+    capability: verification
+    modalities: [text]
+    keywords: []
+    verification_required: true
+    human_review_required: true

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sparse-network.local/schemas/artifact-v1.json",
+  "title": "Sparse Network Artifact v1",
+  "type": "object",
+  "required": ["id", "request_id", "kind", "media_type", "path", "size_bytes", "content_sha256", "created_at", "provenance", "access_control", "retention", "metadata"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^artifact-" },
+    "request_id": { "type": "string", "pattern": "^request-" },
+    "kind": { "type": "string", "minLength": 1 },
+    "media_type": { "type": "string", "minLength": 1 },
+    "path": { "type": "string", "minLength": 1 },
+    "size_bytes": { "type": "integer", "minimum": 0 },
+    "content_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "provenance": { "type": "object" },
+    "access_control": { "type": "object" },
+    "retention": { "type": "object" },
+    "metadata": { "type": "object" }
+  },
+  "additionalProperties": false
+}

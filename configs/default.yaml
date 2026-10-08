@@ -1,0 +1,56 @@
+paths:
+  model_cache: null
+  artifacts: .sparse-data/artifacts
+  logs: .sparse-data/logs
+  runs: .sparse-data/runs
+  indexes: .sparse-data/indexes
+
+runtime_executables:
+  llama_cpp: llama-server
+  transformers: python
+  ocr: python
+  embeddings: python
+  decisions: python
+  pdf_renderer: pdftoppm
+
+retrieval:
+  default_endpoint: harrier-0.6b
+  maximum_chunk_characters: 1200
+  overlap_characters: 120
+  default_top_k: 5
+
+fleet:
+  roster: configs/rosters/reference-32gb-gemma12.yaml
+  queue_capacity: 32
+  require_gpu_telemetry: true
+
+routing:
+  routes: configs/routes.yaml
+  workflows: configs/workflows.yaml
+  use_cases: configs/usecases.yaml
+
+use_cases:
+  allowed_source_roots:
+    - .
+
+controller:
+  bind_host: 127.0.0.1
+  startup_timeout_seconds: 120
+  request_timeout_seconds: 300
+  shutdown_grace_seconds: 10
+  telemetry_interval_seconds: 0.2
+  maximum_image_bytes: 20971520
+  vram_reclaim_tolerance_bytes: 536870912
+
+repetition:
+  min_repeats: 4
+  min_period: 1
+  max_period: 1024
+  min_total_repeated: 60
+  sample_len: 16
+  sample_interval: 128
+  streaming_check_interval_characters: 128
+  maximum_retries: 1
+
+model_registry: configs/models.yaml
+endpoint_overrides: {}

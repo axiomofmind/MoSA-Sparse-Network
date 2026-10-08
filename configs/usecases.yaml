@@ -1,0 +1,253 @@
+schema: sparse-network-use-case-config.v1
+version: 1
+maximum_model_stages: 3
+maximum_inputs: 500
+maximum_batch_records: 10000
+allowed_source_roots:
+  - .
+
+tools:
+  python_compile:
+    label: Python compile check
+    mode: read_only
+    argv: ["{python}", -m, compileall, -q, .]
+    timeout_seconds: 120
+  test:
+    label: Frozen test suite
+    mode: read_only
+    argv: ["{python}", -m, pytest, -q]
+    timeout_seconds: 300
+  lint:
+    label: Ruff lint
+    mode: read_only
+    argv: ["{python}", -m, ruff, check, .]
+    timeout_seconds: 120
+  format_check:
+    label: Ruff format check
+    mode: read_only
+    argv: ["{python}", -m, ruff, format, --check, .]
+    timeout_seconds: 120
+templates:
+  developer-workstation:
+    title: Multimodal developer workstation
+    kind: developer
+    description: Diagnose and verify repository work from source, logs, tests, and screenshots.
+    task_ui:
+      action: Work on code
+      summary: Inspect a local project, diagnose a problem, and verify a proposed change.
+      prompt_label: What should be changed or investigated?
+      prompt_placeholder: Describe the bug, feature, or question and what a successful result looks like.
+      source_label: Repository or project paths
+      source_placeholder: One controller-approved local path per line
+      default_path_kind: repository
+      paste_label: Logs, source, or supporting notes
+      default_paste_kind: source_file
+      accepted_uploads: [.py, .js, .ts, .tsx, .jsx, .json, .yaml, .yml, .toml, .md, .txt, .log, .patch, .diff, .png, .jpg, .jpeg, .webp]
+      category: everyday
+    input_kinds: [repository, working_directory, source_file, log, screenshot, diagram, test_result, patch]
+    route_lane: coding_repair
+    visual_lane: visual_understanding
+    allowed_tools: [format_check, lint, python_compile, test]
+    frozen_escalation_triggers: [deterministic_failure, model_disagreement, repeated_failure]
+    stages:
+      - {id: primary, role: repair, capability: coding, preferred: [qwen35-4b], condition: always}
+      - {id: challenge, role: critique, capability: plan_review, preferred: [nemotron-4b], condition: failed_or_ambiguous}
+      - {id: reconcile, role: reconciliation, capability: reasoning, preferred: [qwen3-8b-fp8], condition: failed_or_ambiguous}
+    dashboard_panels: [workspace, diff, artifacts, visual_evidence, tools, tests, cancellation, rerun]
+
+  private-document-analysis:
+    title: Private document analysis
+    kind: document
+    description: Extract and verify local documents with page-level provenance.
+    task_ui:
+      action: Analyze documents
+      summary: Ask questions, extract fields, and preserve page-linked evidence.
+      prompt_label: What do you need from these documents?
+      prompt_placeholder: Ask a question or describe the fields, tables, or summary you need.
+      source_label: Document paths
+      source_placeholder: One controller-approved PDF, image, office document, or text path per line
+      default_path_kind: pdf
+      paste_label: Pasted document text or notes
+      default_paste_kind: text_document
+      accepted_uploads: [.pdf, .png, .jpg, .jpeg, .webp, .txt, .md, .csv, .json]
+      default_ocr_mode: fast
+      ocr_modes:
+        - {id: fast, label: Fast, summary: "Quick text extraction for straightforward pages using PP-OCRv6."}
+        - {id: complex, label: Complex, summary: "Full document parsing for tables, formulas, charts, and difficult layouts using PaddleOCR-VL 1.6."}
+      category: everyday
+    input_kinds: [pdf, page_image, image, office_document, text_document]
+    route_lane: visual_document_extraction
+    visual_lane: visual_document_extraction
+    allowed_tools: []
+    frozen_escalation_triggers: [missing_evidence, model_disagreement, maximum_quality]
+    stages:
+      - id: extract
+        role: ocr
+        capability: document_ocr
+        preferred: [pp-ocrv6-medium]
+        preferred_by_ocr_mode:
+          fast: [pp-ocrv6-medium]
+          complex: [paddleocr-vl-1.6]
+        strict_preferred: true
+        condition: visual
+      - {id: interpret, role: interpretation, capability: visual_understanding, preferred: [gemma-e2b-vision, gemma4-12b-qat], condition: always}
+      - {id: challenge, role: validation, capability: verification, preferred: [nemotron-4b, qwen3-8b-fp8], condition: ambiguous_or_high_risk}
+    dashboard_panels: [source, pages, synchronized_text, regions, conflicts, schema, citations, export]
+
+  incident-assistant:
+    title: Local operations and incident assistant
+    kind: incident
+    description: Build an evidence/action timeline with diagnostics before remediation.
+    task_ui:
+      action: Investigate an incident
+      summary: Turn logs and symptoms into an evidence timeline, diagnosis, and safe next steps.
+      prompt_label: What happened and what needs to be understood?
+      prompt_placeholder: Describe the symptoms, impact, timing, and the question you need answered.
+      source_label: Log, configuration, screenshot, or state paths
+      source_placeholder: One controller-approved local path per line
+      default_path_kind: log
+      paste_label: Logs, symptoms, or incident notes
+      default_paste_kind: incident_note
+      accepted_uploads: [.log, .txt, .json, .yaml, .yml, .toml, .ini, .png, .jpg, .jpeg, .webp]
+      category: everyday
+    input_kinds: [log, configuration, service_state, screenshot, incident_note, tool_result]
+    route_lane: difficult_reasoning
+    visual_lane: visual_understanding
+    allowed_tools: [python_compile, test]
+    frozen_escalation_triggers: [high_risk, deterministic_failure, model_disagreement]
+    stages:
+      - {id: symptoms, role: extraction, capability: extraction, preferred: [lfm25-1.2b], condition: always}
+      - {id: hypotheses, role: diagnosis, capability: reasoning, preferred: [qwen35-4b], condition: always}
+      - {id: challenge, role: critique, capability: plan_review, preferred: [nemotron-4b], condition: always}
+    dashboard_panels: [timeline, facts, hypotheses, proposed_actions, permissions, diagnostics, remediation]
+
+  structured-batch:
+    title: High-volume structured processing
+    kind: batch
+    description: Validate identity-preserving records with bounded retry, escalation, and replay.
+    task_ui:
+      action: Process a batch
+      summary: Convert many records into a validated structure with bounded retries and dead letters.
+      prompt_label: What should be extracted or validated?
+      prompt_placeholder: Describe the desired output and the rules every record must satisfy.
+      source_label: Optional batch manifest paths
+      source_placeholder: One controller-approved manifest path per line
+      default_path_kind: batch_manifest
+      paste_label: Optional batch notes
+      default_paste_kind: text_record
+      accepted_uploads: [.json, .jsonl, .csv, .txt]
+      category: everyday
+    input_kinds: [batch_manifest, text_record, image_record]
+    route_lane: extraction
+    visual_lane: visual_document_extraction
+    allowed_tools: []
+    frozen_escalation_triggers: [deterministic_failure, missing_evidence, model_disagreement]
+    stages:
+      - {id: extract, role: extraction, capability: extraction, preferred: [lfm25-1.2b], condition: always}
+      - {id: specialist, role: exception, capability: verification, preferred: [gemma-e2b-vision, nemotron-4b], condition: exceptional}
+    dashboard_panels: [progress, throughput, queues, counts, record_trace, replay, exports]
+
+  research-synthesis:
+    title: Local research and evidence synthesis
+    kind: research
+    description: Produce claim-level synthesis from a versioned local evidence corpus.
+    retrieval_endpoint: embeddinggemma2-256
+    task_ui:
+      action: Research local sources
+      summary: Search local evidence and produce a source-linked synthesis without unsupported claims.
+      prompt_label: What question should the evidence answer?
+      prompt_placeholder: State the research question and the form the final synthesis should take.
+      source_label: Evidence source paths
+      source_placeholder: One controller-approved document or note path per line
+      default_path_kind: text_document
+      paste_label: Pasted sources or research notes
+      default_paste_kind: note
+      accepted_uploads: [.txt, .md, .pdf, .png, .jpg, .jpeg, .webp]
+      category: everyday
+    input_kinds: [text_document, pdf, page_image, figure, note, retrieval_result]
+    route_lane: general_generation
+    visual_lane: visual_understanding
+    allowed_tools: []
+    frozen_escalation_triggers: [missing_evidence, model_disagreement, maximum_quality]
+    stages:
+      - {id: triage, role: extraction, capability: extraction, preferred: [lfm25-1.2b], condition: always}
+      - {id: synthesis, role: synthesis, capability: text_generation, preferred: [qwen35-4b], condition: always}
+      - {id: challenge, role: critique, capability: verification, preferred: [nemotron-4b, qwen3-8b-fp8], condition: always}
+    dashboard_panels: [corpus, index_revision, retrieval, claims, disagreements, unsupported, report_export]
+
+  troubleshooting-assistant:
+    title: Technical troubleshooting assistant
+    kind: troubleshooting
+    description: Separate symptoms, evidence, hypotheses, reversible tests, and risky changes.
+    task_ui:
+      action: Troubleshoot a problem
+      summary: Separate evidence from hypotheses and propose reversible diagnostic steps.
+      prompt_label: What is not working?
+      prompt_placeholder: Describe the expected behavior, actual behavior, and what has already been tried.
+      source_label: Manual, log, screenshot, configuration, or diagram paths
+      source_placeholder: One controller-approved local path per line
+      default_path_kind: diagnostic
+      paste_label: Symptoms and diagnostic output
+      default_paste_kind: diagnostic
+      accepted_uploads: [.txt, .md, .log, .json, .yaml, .yml, .toml, .ini, .png, .jpg, .jpeg, .webp]
+      category: everyday
+    input_kinds: [manual, log, screenshot, diagnostic, configuration, diagram]
+    route_lane: difficult_reasoning
+    visual_lane: visual_understanding
+    allowed_tools: [python_compile, test]
+    frozen_escalation_triggers: [high_risk, deterministic_failure, model_disagreement]
+    stages:
+      - {id: diagnose, role: diagnosis, capability: reasoning, preferred: [qwen35-4b], condition: always}
+      - {id: challenge, role: critique, capability: plan_review, preferred: [nemotron-4b], condition: always}
+    dashboard_panels: [symptoms, evidence, hypotheses, tests, manuals, diagrams, action_risk, approvals, rollback]
+
+  meeting-analysis:
+    title: Audio and meeting analysis
+    kind: meeting
+    description: Preserve media, timestamped transcript evidence, corrections, and linked action items.
+    task_ui:
+      action: Analyze a meeting
+      summary: Preserve the recording or transcript and produce evidence-linked decisions and actions.
+      prompt_label: What should be captured from the meeting?
+      prompt_placeholder: Describe the summary, decisions, risks, and action items you need.
+      source_label: Recording, video, or transcript paths
+      source_placeholder: One controller-approved local path per line
+      default_path_kind: transcript
+      paste_label: Existing transcript
+      default_paste_kind: transcript
+      accepted_uploads: [.txt, .md, .wav, .mp3, .m4a, .flac, .mp4, .webm]
+      category: everyday
+    input_kinds: [audio, video, transcript, speaker_correction]
+    route_lane: audio_transcription
+    visual_lane: visual_understanding
+    allowed_tools: []
+    frozen_escalation_triggers: [missing_evidence, model_disagreement]
+    stages:
+      - {id: streaming_asr, role: transcription, capability: audio_transcription, preferred: [qwen3-asr], condition: audio_without_transcript}
+      - {id: diarization, role: diarization, capability: speaker_diarization, preferred: [moss-transcribe-diarize], condition: multi_speaker}
+      - {id: summarize, role: summary, capability: text_generation, preferred: [qwen35-4b], condition: always}
+    dashboard_panels: [player, transcript, speakers, corrections, hotwords, language, confidence, actions]
+
+  routing-antidoom-lab:
+    title: Model-routing and AntiDoom laboratory
+    kind: experiment
+    description: Record reproducible routing, quantization, scheduling, and repetition comparisons.
+    task_ui:
+      action: Evaluate routing and models
+      summary: Run a frozen comparison for routing, quantization, scheduling, or repetition behavior.
+      prompt_label: What should this evaluation compare?
+      prompt_placeholder: Describe the hypothesis, baselines, dataset, and acceptance criteria.
+      source_label: Dataset or prior-result paths
+      source_placeholder: One controller-approved local path per line
+      default_path_kind: dataset
+      paste_label: Frozen case identifiers or evaluation notes
+      default_paste_kind: dataset
+      accepted_uploads: [.json, .jsonl, .csv, .txt, .md]
+      category: advanced
+    input_kinds: [dataset, prompt_set, endpoint_manifest, run_result]
+    route_lane: maximum_quality
+    visual_lane: visual_understanding
+    allowed_tools: []
+    frozen_escalation_triggers: [maximum_quality, model_disagreement, repeated_failure]
+    stages: []
+    dashboard_panels: [template, comparisons, confidence_intervals, cost_quality, latency_quality, utilization, regressions, admission]

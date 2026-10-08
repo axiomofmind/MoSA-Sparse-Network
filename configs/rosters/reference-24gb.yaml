@@ -1,0 +1,16 @@
+id: nvidia-24gb-multimodal-gemma12
+display_name: 24 GB Standard (Gemma 12B)
+variant: standard
+hardware_profile: nvidia-24gb
+validation_state: provisional_requires_matching_hardware
+cpu:
+  - harrier-0.6b
+resident:
+  - lfm25-1.2b
+  - qwen35-4b
+  - nemotron-4b
+  - gemma-e2b-vision
+  - qwen3-8b-fp8
+  - gemma4-12b-qat
+exclusive_swap:
+  - qwen38-27b-q4

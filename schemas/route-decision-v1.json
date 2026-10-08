@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sparse-network.local/schemas/route-decision-v1.json",
+  "title": "Sparse Network Route Decision v1",
+  "type": "object",
+  "required": ["schema", "lane", "endpoint", "reason", "source", "rejected"],
+  "properties": {
+    "schema": { "const": "sparse-network-route-decision.v1" },
+    "lane": { "type": "string", "minLength": 1 },
+    "endpoint": { "type": ["string", "null"] },
+    "reason": { "type": "string", "minLength": 1 },
+    "source": { "type": "string", "minLength": 1 },
+    "required_modalities": { "type": "array", "items": { "type": "string" } },
+    "verification_required": { "type": "boolean" },
+    "human_review_required": { "type": "boolean" },
+    "rejected": { "type": "boolean" },
+    "router_scores_used": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

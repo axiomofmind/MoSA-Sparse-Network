@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Sparse — Local AI workspace</title>
+    <link rel="stylesheet" href="/dashboard/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <a class="brand" href="#home" aria-label="Sparse home">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span><strong>Sparse</strong><small>LOCAL AI</small></span>
+        </a>
+        <nav id="primary-nav">
+          <button class="nav-item is-active" data-view="home">Home</button>
+          <button class="nav-item" data-view="work">My work</button>
+          <button class="nav-item nav-secondary" data-view="settings">Settings</button>
+        </nav>
+        <div class="sidebar-foot">
+          <span id="role-pill" class="readonly-pill">DISCONNECTED</span>
+          <p>Private work on this computer.</p>
+        </div>
+      </aside>
+
+      <div class="workspace">
+        <header class="topbar">
+          <div class="topbar-title">
+            <button id="menu-button" class="icon-button menu-button" aria-label="Toggle navigation">☰</button>
+            <div><p class="eyebrow">PRIVATE LOCAL WORKSPACE</p><h1 id="view-title">Home</h1></div>
+          </div>
+          <div class="topbar-actions">
+            <button id="connection-chip" class="connection-chip is-loading" type="button" aria-label="Open system status">
+              <span></span><strong>Connecting</strong><small>waiting for controller</small>
+            </button>
+            <button id="session-button" class="session-button">Connect</button>
+          </div>
+        </header>
+
+        <div id="system-banner" class="system-banner is-hidden" role="status"></div>
+        <main id="main-content" tabindex="-1" aria-live="polite">
+          <section class="loading-state">
+            <div class="spinner" aria-hidden="true"></div>
+            <h2>Opening your workspace</h2>
+            <p>Your available actions will match this connection.</p>
+          </section>
+        </main>
+        <footer class="status-footer">
+          <span id="snapshot-time">No snapshot</span>
+          <span id="event-position">Updates —</span>
+        </footer>
+      </div>
+    </div>
+
+    <dialog id="auth-dialog" class="modal">
+      <form method="dialog" id="auth-form">
+        <p class="eyebrow">PRIVATE CONNECTION</p>
+        <h2>Connect to Sparse</h2>
+        <p>Enter the connection token used to start Sparse. It stays in this browser session.</p>
+        <label>Connection token<input id="token-input" type="password" minlength="16" autocomplete="current-password" required></label>
+        <div class="modal-actions">
+          <button type="button" id="auth-cancel" class="button secondary">Cancel</button>
+          <button value="default" class="button primary" id="auth-submit">Connect</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="detail-dialog" class="modal detail-modal">
+      <form method="dialog">
+        <div class="detail-heading"><div><p class="eyebrow">DETAILS</p><h2 id="detail-title">Detail</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></div>
+        <div id="detail-body"></div>
+      </form>
+    </dialog>
+
+    <dialog id="confirm-dialog" class="modal confirm-modal">
+      <form method="dialog" id="confirm-form">
+        <p class="eyebrow">CONTROLLER CONFIRMATION</p>
+        <h2 id="confirm-title">Confirm operation</h2>
+        <div id="confirm-summary"></div>
+        <label id="license-confirm-row" class="check-row is-hidden">
+          <input id="license-confirm" type="checkbox">
+          I have reviewed and accept the listed model licenses for local use.
+        </label>
+        <label>Type the confirmation phrase
+          <code id="confirm-phrase"></code>
+          <input id="confirm-input" type="text" autocomplete="off" required>
+        </label>
+        <div class="modal-actions">
+          <button type="button" id="confirm-cancel" class="button secondary">Cancel</button>
+          <button value="default" class="button danger" id="confirm-submit">Confirm</button>
+        </div>
+      </form>
+    </dialog>
+    <script type="module" src="/dashboard/app.js"></script>
+  </body>
+</html>

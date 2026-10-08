@@ -1,0 +1,673 @@
+schema: sparse-network-model-registry.v1
+
+endpoints:
+  embeddinggemma2-256:
+    display_name: EmbeddingGemma 2 Text 256d BF16
+    role: long_context_retrieval_embedder
+    family: embeddinggemma2
+    source:
+      type: huggingface
+      repository: google/embeddinggemma-2
+      revision: 914f7f89142e33e77833254d9c9b90c3cef7303b
+      download_size_bytes: 1525786076
+      files:
+        config: config.json
+        model: model.safetensors
+        modules: modules.json
+        pooling: 1_Pooling/config.json
+        normalization: 2_Normalize/config.json
+        sentence_transformers_config: config_sentence_transformers.json
+        sentence_bert_config: sentence_bert_config.json
+        processor_config: processor_config.json
+        preprocessor_config: preprocessor_config.json
+        tokenizer: tokenizer.json
+        tokenizer_model: tokenizer.model
+        tokenizer_config: tokenizer_config.json
+    runtime:
+      adapter: embedding_sentence_transformers
+      device: cpu
+      dimension: 256
+      max_length: 8192
+      batch_size: 8
+      threads: 0
+      query_prompt: SearchQuery
+      document_prompt: Document
+      active_modalities: [text]
+      dtype: float32
+    environment:
+      CUDA_VISIBLE_DEVICES: ""
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    modalities: [embeddings]
+    capabilities: [retrieval, semantic_similarity, multilingual_retrieval, code_retrieval]
+    context_size: 8192
+    max_output_tokens: 0
+    max_input_characters: 65536
+    proposed_budget:
+      reference_hardware: cpu-system-ram
+      cold_load_ms: 20000
+      request_ms: 1000
+      process_ram_bytes: 3221225472
+      incremental_vram_bytes: 0
+      measured_on: 2026-10-08
+      review_state: accepted_role_gate
+    license:
+      id: apache-2.0
+      review_required: false
+    admission:
+      state: admitted
+      scope: multilingual_long_context_retrieval
+      basis: frozen_retrieval_5_of_5
+
+  d1-3b:
+    display_name: Liquid AI d1 3B BF16
+    role: advisory_decision_router
+    family: lfm2.5
+    source:
+      type: huggingface
+      repository: LiquidAI/d1-3B
+      revision: 051bcc464b01b9f92942b364d9586b0ef5912432
+      download_size_bytes: 6265040453
+      files:
+        config: config.json
+        model: model.safetensors
+        tokenizer: tokenizer.json
+        tokenizer_config: tokenizer_config.json
+        processor_config: processor_config.json
+        chat_template: chat_template.jinja
+        remote_api: api.py
+        remote_hybrid: hybrid.py
+        remote_lfm2_vl: lfm2_vl.py
+        remote_modeling: modeling_d1.py
+        remote_prompt: prompt.py
+        remote_runner: runner.py
+        license: LICENSE
+    runtime:
+      adapter: decision_transformers
+      device: cuda:0
+      gpu_memory_fraction: 0.40
+      trust_remote_code: true
+      custom_code_review_revision: 051bcc464b01b9f92942b364d9586b0ef5912432
+    environment:
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    modalities: [text, image]
+    capabilities: [route_scoring, classification, reranking, verification, visual_inspection]
+    context_size: 32768
+    max_output_tokens: 0
+    max_input_characters: 131072
+    proposed_budget:
+      reference_hardware: nvidia-32gb
+      cold_load_ms: 15000
+      request_ms: 5000
+      process_ram_bytes: 4294967296
+      incremental_vram_bytes: 8589934592
+      measured_on: 2026-10-08
+      review_state: accepted_role_gate
+    license:
+      id: lfm1.0
+      review_required: true
+      redistribution_review_required: true
+      note: Custom terms require review before redistribution or production use.
+    admission:
+      state: admitted
+      scope: advisory_route_scoring_only
+      basis: bounded_route_selection_passed
+
+  harrier-0.6b:
+    display_name: Harrier OSS v1 0.6B BF16
+    role: retrieval_embedder
+    family: qwen3
+    source:
+      type: huggingface
+      repository: microsoft/harrier-oss-v1-0.6b
+      revision: f9b9dc8d367d443f2479d27aa5d8d2850c0774ee
+      download_size_bytes: 1203565016
+      files:
+        config: config.json
+        model: model.safetensors
+        tokenizer: tokenizer.json
+        tokenizer_config: tokenizer_config.json
+        special_tokens: special_tokens_map.json
+        added_tokens: added_tokens.json
+    runtime:
+      adapter: embedding_transformers
+      device: cpu
+      pooling: last_token
+      dimension: 1024
+      max_length: 2048
+      threads: 0
+      query_instruction: "Instruct: Given a search query, retrieve relevant passages that answer the query\nQuery: "
+    environment:
+      CUDA_VISIBLE_DEVICES: ""
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    modalities: [embeddings]
+    capabilities: [retrieval, semantic_similarity, multilingual_retrieval, reranking]
+    context_size: 32768
+    max_output_tokens: 0
+    max_input_characters: 65536
+    proposed_budget:
+      reference_hardware: nvidia-32gb
+      cold_load_ms: 5000
+      request_ms: 500
+      process_ram_bytes: 2147483648
+      incremental_vram_bytes: 0
+      measured_on: 2026-08-23
+      review_state: accepted_provisional
+    license:
+      id: mit
+      review_required: false
+    admission:
+      state: admitted
+      scope: local_technical
+
+  minilm-l6-v2:
+    display_name: all-MiniLM-L6-v2
+    role: retrieval_baseline
+    family: bert
+    source:
+      type: huggingface
+      repository: sentence-transformers/all-MiniLM-L6-v2
+      revision: c9745ed1d9f207416be6d2e6f8de32d1f16199bf
+      download_size_bytes: 91335697
+      files:
+        config: config.json
+        model: model.safetensors
+        tokenizer: tokenizer.json
+        tokenizer_config: tokenizer_config.json
+        special_tokens: special_tokens_map.json
+    runtime:
+      adapter: embedding_transformers
+      device: cpu
+      pooling: mean
+      dimension: 384
+      max_length: 256
+      threads: 0
+      query_instruction: ""
+    environment:
+      CUDA_VISIBLE_DEVICES: ""
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    modalities: [embeddings]
+    capabilities: [retrieval, semantic_similarity, baseline]
+    context_size: 256
+    max_output_tokens: 0
+    max_input_characters: 2048
+    proposed_budget:
+      reference_hardware: nvidia-32gb
+      cold_load_ms: 4000
+      request_ms: 100
+      process_ram_bytes: 1073741824
+      incremental_vram_bytes: 0
+      measured_on: 2026-08-23
+      review_state: baseline
+    license:
+      id: apache-2.0
+      review_required: false
+    admission:
+      state: admitted
+      scope: retrieval_baseline
+
+  mock-echo:
+    display_name: Mock Echo
+    role: development_fixture
+    source:
+      type: builtin
+    runtime:
+      adapter: mock
+    modalities: [text]
+    capabilities: [text_generation, development_test]
+    context_size: 4096
+    max_output_tokens: 512
+    admission:
+      state: admitted
+
+  qwen35-4b:
+    display_name: Qwen3.5 4B Q4
+    role: default_worker
+    family: qwen
+    source:
+      type: huggingface
+      repository: unsloth/Qwen3.5-4B-GGUF
+      revision: e87f176479d0855a907a41277aca2f8ee7a09523
+      download_size_bytes: 2912109728
+      files:
+        model: Qwen3.5-4B-UD-Q4_K_XL.gguf
+    runtime:
+      adapter: llama_cpp
+      gpu_layers: 999
+      parallel_slots: 1
+      batch_size: 512
+      micro_batch_size: 128
+      thinking: false
+    modalities: [text]
+    capabilities: [text_generation, coding, planning, tool_planning]
+    context_size: 8192
+    max_output_tokens: 2048
+    max_input_characters: 6144
+    proposed_budget:
+      reference_hardware: nvidia-32gb
+      cold_load_ms: 15000
+      request_ms: 30000
+      process_ram_bytes: 4294967296
+      incremental_vram_bytes: 1610612736
+      kv_cache_bytes: 1073741824
+      request_workspace_bytes: 268435456
+      vram_reclaim_tolerance_bytes: 67108864
+      measured_on: 2026-08-23
+      review_state: accepted_role_gate
+    license:
+      id: apache-2.0
+      review_required: false
+    admission:
+      state: admitted
+      scope: resident_general_generation_coding_and_tool_planning
+      basis: role_smoke_and_lifecycle_passed
+
+  lfm25-1.2b:
+    display_name: LFM2.5 1.2B Instruct Q4_K_M
+    role: dispatcher
+    family: lfm2.5
+    source:
+      type: huggingface
+      repository: LiquidAI/LFM2.5-1.2B-Instruct-GGUF
+      revision: 047e06635fbe71469926b35ea414537245218200
+      download_size_bytes: 730895168
+      files:
+        model: LFM2.5-1.2B-Instruct-Q4_K_M.gguf
+    runtime:
+      adapter: llama_cpp
+      gpu_layers: 999
+      parallel_slots: 1
+      batch_size: 512
+      micro_batch_size: 128
+    modalities: [text]
+    capabilities: [classification, extraction, rewriting, compression, dispatch]
+    context_size: 4096
+    max_output_tokens: 512
+    max_input_characters: 3584
+    proposed_budget:
+      reference_hardware: nvidia-32gb
+      cold_load_ms: 2000
+      request_ms: 3000
+      process_ram_bytes: 1342177280
+      incremental_vram_bytes: 536870912
+      kv_cache_bytes: 268435456
+      request_workspace_bytes: 67108864
+      vram_reclaim_tolerance_bytes: 536870912
+      measured_on: 2026-08-23
+      review_state: accepted_provisional
+    license:
+      id: lfm1.0
+      review_required: true
+      redistribution_review_required: true
+      note: Custom terms include a revenue threshold and redistribution notices.
+    admission:
+      state: admitted
+      scope: local_technical
+
+  nemotron-4b:
+    display_name: NVIDIA Nemotron 3 Nano 4B Q4_K_M
+    role: critic
+    family: nemotron3
+    source:
+      type: huggingface
+      repository: nvidia/NVIDIA-Nemotron-3-Nano-4B-GGUF
+      revision: ba223d14e45525f7fae81db77ea8cabeb2fc6c25
+      download_size_bytes: 2837072864
+      files:
+        model: NVIDIA-Nemotron3-Nano-4B-Q4_K_M.gguf
+    runtime:
+      adapter: llama_cpp
+      gpu_layers: 999
+      parallel_slots: 1
+      batch_size: 512
+      micro_batch_size: 128
+      thinking: false
+    modalities: [text]
+    capabilities: [critique, contradiction_detection, plan_review, code_review]
+    context_size: 8192
+    max_output_tokens: 768
+    max_input_characters: 7424
+    proposed_budget:
+      reference_hardware: nvidia-32gb
+      cold_load_ms: 4000
+      request_ms: 5000
+      process_ram_bytes: 3758096384
+      incremental_vram_bytes: 1610612736
+      kv_cache_bytes: 1073741824
+      request_workspace_bytes: 268435456
+      vram_reclaim_tolerance_bytes: 536870912
+      measured_on: 2026-08-23
+      review_state: accepted_provisional
+    license:
+      id: nvidia-nemotron-open-model-license
+      review_required: true
+      redistribution_review_required: true
+      note: Redistribution requires the NVIDIA agreement and attribution notice.
+    admission:
+      state: admitted
+      scope: local_technical
+
+  gemma-e2b-vision:
+    display_name: Gemma 4 E2B Vision Q4_K_M
+    role: vision_specialist
+    family: gemma4
+    source:
+      type: huggingface
+      repository: unsloth/gemma-4-E2B-it-GGUF
+      revision: 90f9618340396838ee7ff5b0ba2da27da62953d3
+      download_size_bytes: 4092390336
+      files:
+        model: gemma-4-E2B-it-Q4_K_M.gguf
+        projector: mmproj-F16.gguf
+    runtime:
+      adapter: llama_cpp
+      gpu_layers: 999
+      parallel_slots: 1
+      batch_size: 2048
+      micro_batch_size: 2048
+      thinking: false
+    modalities: [text, image]
+    capabilities: [visual_understanding, screenshot_analysis, document_vision, chart_analysis]
+    context_size: 8192
+    max_output_tokens: 768
+    max_input_characters: 7424
+    proposed_budget:
+      reference_hardware: nvidia-32gb
+      cold_load_ms: 6000
+      request_ms: 10000
+      process_ram_bytes: 2684354560
+      incremental_vram_bytes: 4294967296
+      kv_cache_bytes: 1073741824
+      request_workspace_bytes: 1073741824
+      vram_reclaim_tolerance_bytes: 536870912
+      measured_on: 2026-08-23
+      review_state: accepted_provisional
+    license:
+      id: apache-2.0
+      review_required: false
+    admission:
+      state: admitted
+      scope: local_technical
+      blocking_for_baseline: true
+
+  pp-ocrv6-medium:
+    display_name: PP-OCRv6 Medium
+    role: fast_document_ocr
+    family: paddleocr
+    source:
+      type: huggingface_bundle
+      artifacts:
+        detection_config:
+          repository: PaddlePaddle/PP-OCRv6_medium_det_safetensors
+          revision: 4236c2b61741a259c091fd879dcc4edc339e916c
+          path: config.json
+          download_size_bytes: 88024270
+          files: [config.json, inference.yml, model.safetensors, preprocessor_config.json]
+        recognition_config:
+          repository: PaddlePaddle/PP-OCRv6_medium_rec_safetensors
+          revision: 024cad6a831de75c2c3c26e711ba8c4a82ccd24b
+          path: config.json
+          download_size_bytes: 77099608
+          files: [config.json, inference.yml, model.safetensors, preprocessor_config.json]
+    runtime:
+      adapter: paddle_ocr
+      device: gpu:0
+    modalities: [text, image]
+    capabilities: [document_ocr]
+    context_size: 8192
+    max_output_tokens: 4096
+    max_input_characters: 4096
+    proposed_budget:
+      reference_hardware: nvidia-32gb
+      cold_load_ms: 5000
+      request_ms: 3000
+      process_ram_bytes: 2147483648
+      incremental_vram_bytes: 1073741824
+      kv_cache_bytes: 0
+      request_workspace_bytes: 536870912
+      vram_reclaim_tolerance_bytes: 536870912
+      measured_on: 2026-10-08
+      review_state: local_test_required
+    license:
+      id: apache-2.0
+      review_required: false
+    admission:
+      state: admitted
+      scope: local_document_analysis
+
+  paddleocr-vl-1.6:
+    display_name: PaddleOCR-VL 1.6 1B BF16
+    role: complex_document_ocr
+    family: paddleocr-vl
+    source:
+      type: huggingface
+      repository: PaddlePaddle/PaddleOCR-VL-1.6
+      revision: c5630abae1d940eafe0697512a0325494b02ab42
+      download_size_bytes: 1930399923
+      files:
+        config: config.json
+        generation_config: generation_config.json
+        model: model.safetensors
+        configuration: configuration_paddleocr_vl.py
+        image_processing: image_processing_paddleocr_vl.py
+        modeling: modeling_paddleocr_vl.py
+        processing: processing_paddleocr_vl.py
+        processor_config: preprocessor_config.json
+        tokenizer: tokenizer.json
+        tokenizer_model: tokenizer.model
+        tokenizer_config: tokenizer_config.json
+        chat_template: chat_template.jinja
+    runtime:
+      adapter: transformers
+      device: cuda:0
+      gpu_memory_fraction: 0.45
+      thinking: false
+      ocr_prompt: "OCR:"
+    modalities: [text, image]
+    capabilities: [document_ocr, document_vision, visual_understanding]
+    context_size: 8192
+    max_output_tokens: 2048
+    max_input_characters: 6144
+    proposed_budget:
+      reference_hardware: nvidia-32gb
+      cold_load_ms: 10000
+      request_ms: 30000
+      process_ram_bytes: 4294967296
+      incremental_vram_bytes: 4294967296
+      kv_cache_bytes: 1073741824
+      request_workspace_bytes: 1073741824
+      vram_reclaim_tolerance_bytes: 536870912
+      measured_on: 2026-10-08
+      review_state: local_test_required
+    license:
+      id: apache-2.0
+      review_required: false
+    admission:
+      state: admitted
+      scope: local_document_analysis
+
+  qwen3-8b-fp8:
+    display_name: Qwen3 8B FP8
+    role: reasoner
+    family: qwen3
+    source:
+      type: huggingface
+      repository: Qwen/Qwen3-8B-FP8
+      revision: 220b46e3b2180893580a4454f21f22d3ebb187d3
+      download_size_bytes: 9452566812
+      files:
+        config: config.json
+        generation_config: generation_config.json
+        index: model.safetensors.index.json
+        model_shard_1: model-00001-of-00002.safetensors
+        model_shard_2: model-00002-of-00002.safetensors
+        tokenizer: tokenizer.json
+        tokenizer_config: tokenizer_config.json
+        vocab: vocab.json
+        merges: merges.txt
+    runtime:
+      adapter: transformers
+      device: cuda:0
+      gpu_memory_fraction: 0.75
+      thinking: false
+      kernel:
+        repository: kernels-community/finegrained-fp8
+        revision: 7cdb05d472d6c954c7d03182ed836ebfd4610df0
+        api_version: 4
+    modalities: [text]
+    capabilities: [reasoning, reconciliation, verification]
+    context_size: 8192
+    max_output_tokens: 768
+    max_input_characters: 7424
+    proposed_budget:
+      reference_hardware: nvidia-32gb
+      cold_load_ms: 10000
+      request_ms: 30000
+      process_ram_bytes: 2684354560
+      incremental_vram_bytes: 10737418240
+      kv_cache_bytes: 2147483648
+      request_workspace_bytes: 1073741824
+      vram_reclaim_tolerance_bytes: 536870912
+      measured_on: 2026-08-23
+      review_state: accepted_provisional
+    license:
+      id: apache-2.0
+      review_required: false
+    admission:
+      state: admitted
+      scope: local_technical
+
+  qwen38-27b:
+    display_name: Qwen3.8 27B UD-Q8_K_XL
+    role: exclusive_escalation_solver
+    family: qwen3.8
+    source:
+      type: huggingface
+      repository: unsloth/Qwen3.8-27B-GGUF
+      revision: 27af057ecb382ddfea5d12837360a8980560e3ed
+      download_size_bytes: 31457991680
+      files:
+        model: Qwen3.8-27B-UD-Q8_K_XL.gguf
+    runtime:
+      adapter: llama_cpp
+      artifact_class: complete_model
+      minimum_complete_model_bytes: 21474836480
+      exclusive_swap: true
+      gpu_layers: 65
+      parallel_slots: 1
+      batch_size: 256
+      micro_batch_size: 64
+      thinking: false
+    modalities: [text]
+    capabilities: [maximum_quality, independent_solving, adjudication, reconciliation]
+    context_size: 4096
+    max_output_tokens: 512
+    max_input_characters: 3584
+    proposed_budget:
+      reference_hardware: nvidia-32gb
+      cold_load_ms: 20000
+      request_ms: 120000
+      process_ram_bytes: 34359738368
+      incremental_vram_bytes: 8589934592
+      kv_cache_bytes: 1073741824
+      request_workspace_bytes: 1073741824
+      vram_reclaim_tolerance_bytes: 536870912
+      measured_on: 2026-08-23
+      review_state: accepted_provisional
+    license:
+      id: apache-2.0
+      review_required: false
+    admission:
+      state: admitted
+      scope: exclusive_swap_only
+
+  gemma4-12b-qat:
+    display_name: Gemma 4 12B Vision QAT Q4_0
+    role: portable_large_verifier
+    family: gemma4
+    source:
+      type: huggingface
+      repository: google/gemma-4-12B-it-qat-q4_0-gguf
+      revision: 29d097773436b69ff9feafd636ab4cf873786537
+      download_size_bytes: 7150994912
+      files:
+        model: gemma-4-12b-it-qat-q4_0.gguf
+        projector: mmproj-gemma-4-12b-it-qat-q4_0.gguf
+    runtime:
+      adapter: llama_cpp
+      artifact_class: complete_model
+      gpu_layers: 999
+      parallel_slots: 1
+      batch_size: 256
+      micro_batch_size: 64
+      thinking: false
+    modalities: [text, image]
+    capabilities: [verification, visual_understanding, reasoning, coding, tool_use]
+    context_size: 4096
+    max_output_tokens: 512
+    max_input_characters: 3584
+    proposed_budget:
+      reference_hardware: nvidia-24gb-or-32gb
+      cold_load_ms: 10000
+      request_ms: 120000
+      process_ram_bytes: 8589934592
+      incremental_vram_bytes: 3221225472
+      kv_cache_bytes: 1073741824
+      request_workspace_bytes: 1073741824
+      vram_reclaim_tolerance_bytes: 536870912
+      measured_on: 2026-08-23
+      review_state: accepted_provisional
+    license:
+      id: apache-2.0
+      review_required: false
+    admission:
+      state: admitted
+      scope: standard_32gb_or_portable_large_resident
+
+  qwen38-27b-q4:
+    display_name: Qwen3.8 27B UD-Q4_K_M
+    role: portable_exclusive_escalation_solver
+    family: qwen3.8
+    source:
+      type: huggingface
+      repository: unsloth/Qwen3.8-27B-GGUF
+      revision: 4ca720788d1e01f1bff70c033e0d0028fd02e502
+      download_size_bytes: 16464440224
+      files:
+        model: Qwen3.8-27B-UD-Q4_K_M.gguf
+    runtime:
+      adapter: llama_cpp
+      artifact_class: complete_model
+      minimum_complete_model_bytes: 12884901888
+      exclusive_swap: true
+      gpu_layers: 999
+      parallel_slots: 1
+      batch_size: 256
+      micro_batch_size: 64
+      thinking: false
+    modalities: [text]
+    capabilities: [maximum_quality, independent_solving, adjudication, reconciliation]
+    context_size: 4096
+    max_output_tokens: 512
+    max_input_characters: 3584
+    proposed_budget:
+      reference_hardware: nvidia-16gb-24gb-32gb
+      cold_load_ms: 10000
+      request_ms: 120000
+      process_ram_bytes: 17179869184
+      incremental_vram_bytes: 4294967296
+      kv_cache_bytes: 1073741824
+      request_workspace_bytes: 1073741824
+      vram_reclaim_tolerance_bytes: 536870912
+      measured_on: 2026-10-08
+      review_state: accepted_role_gate
+    license:
+      id: apache-2.0
+      review_required: false
+    admission:
+      state: admitted
+      scope: portable_exclusive_swap_adjudication
+      basis: adjudication_quality_and_two_cycle_restoration_passed

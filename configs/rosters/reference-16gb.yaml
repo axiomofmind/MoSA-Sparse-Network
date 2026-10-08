@@ -1,0 +1,17 @@
+id: nvidia-16gb-multimodal-gemma12
+display_name: 16 GB Portable (Gemma 12B)
+variant: portable
+hardware_profile: nvidia-16gb
+validation_state: provisional_requires_matching_hardware
+cpu:
+  - harrier-0.6b
+resident:
+  - lfm25-1.2b
+  - qwen35-4b
+  - nemotron-4b
+  - gemma-e2b-vision
+  - gemma4-12b-qat
+optional:
+  - qwen3-8b-fp8
+exclusive_swap:
+  - qwen38-27b-q4

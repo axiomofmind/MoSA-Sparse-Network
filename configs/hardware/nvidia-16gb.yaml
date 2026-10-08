@@ -1,0 +1,12 @@
+id: nvidia-16gb
+requirements:
+  backend: cuda
+  minimum_usable_vram_gb: 14
+  recommended_system_ram_gb: 32
+scheduler:
+  initial_parallel_generations: 1
+  maximum_parallel_generations: 1
+  allow_cpu_offload: true
+budgets:
+  minimum_vram_reserve_gb: 2
+  total_kv_cache_gb: 5

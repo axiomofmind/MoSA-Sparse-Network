@@ -1,0 +1,8 @@
+id: minimal-mock
+hardware_profile: mock
+validation_state: supported
+cpu: []
+resident:
+  - mock-echo
+optional: []
+exclusive_swap: []

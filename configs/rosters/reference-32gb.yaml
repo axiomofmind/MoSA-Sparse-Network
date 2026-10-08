@@ -1,0 +1,18 @@
+id: nvidia-32gb-multimodal
+display_name: 32 GB Lean
+variant: lean
+hardware_profile: nvidia-32gb
+validation_state: measured_reference_hardware
+cpu:
+  - harrier-0.6b
+resident:
+  - lfm25-1.2b
+  - qwen35-4b
+  - nemotron-4b
+  - gemma-e2b-vision
+  - qwen3-8b-fp8
+optional:
+  - pp-ocrv6-medium
+  - paddleocr-vl-1.6
+exclusive_swap:
+  - qwen38-27b

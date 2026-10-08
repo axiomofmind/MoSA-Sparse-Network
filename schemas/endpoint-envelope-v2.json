@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sparse-network.local/schemas/endpoint-envelope-v2.json",
+  "title": "Sparse Network Endpoint Envelope v2",
+  "type": "object",
+  "required": [
+    "schema",
+    "request_id",
+    "execution_id",
+    "endpoint",
+    "model_revision",
+    "status",
+    "modalities_consumed",
+    "answer_reference",
+    "verification",
+    "repetition",
+    "resource_usage"
+  ],
+  "properties": {
+    "schema": { "const": "sparse-network-envelope.v2" },
+    "request_id": { "type": "string", "minLength": 1 },
+    "execution_id": { "type": "string", "minLength": 1 },
+    "endpoint": { "type": "string", "minLength": 1 },
+    "model_revision": { "type": ["string", "null"] },
+    "status": {
+      "enum": ["answer", "needs_tool", "needs_verification", "needs_escalation", "failed", "cancelled"]
+    },
+    "capability": { "type": ["string", "null"] },
+    "modalities_consumed": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "answer_reference": { "type": ["string", "null"] },
+    "evidence_references": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "verification": { "type": "object" },
+    "repetition": { "type": "object" },
+    "escalation": { "type": "object" },
+    "resource_usage": { "type": "object" }
+  },
+  "additionalProperties": false
+}

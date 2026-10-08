@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sparse-network-controller-event.v1",
+  "type": "object",
+  "required": ["schema", "event_id", "timestamp", "event", "endpoint", "details"],
+  "properties": {
+    "schema": {"const": "sparse-network-controller-event.v1"},
+    "event_id": {"type": "integer", "minimum": 1},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "event": {"type": "string", "minLength": 1},
+    "request_id": {"type": ["string", "null"]},
+    "execution_id": {"type": ["string", "null"]},
+    "endpoint": {"type": "string", "minLength": 1},
+    "details": {"type": "object"}
+  },
+  "additionalProperties": false
+}

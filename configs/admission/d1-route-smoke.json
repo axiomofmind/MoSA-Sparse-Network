@@ -1,0 +1,16 @@
+{
+  "lane": {
+    "type": "choice",
+    "instructions": "Select the minimum sufficient capability lane for this request.",
+    "criteria": {
+      "classification": "Assign a label, category, or intent.",
+      "extraction": "Extract fields, entities, or structured facts.",
+      "formatting": "Format or normalize existing content.",
+      "rewriting": "Rewrite, rephrase, shorten, or compress text.",
+      "general_generation": "Generate a general text response.",
+      "coding_repair": "Write, debug, compile, or repair code.",
+      "tool_planning": "Plan commands or tool execution.",
+      "difficult_reasoning": "Solve a reasoning-heavy problem."
+    }
+  }
+}

@@ -1,0 +1,12 @@
+id: mock
+requirements:
+  backend: mock
+  minimum_usable_vram_gb: 0
+  recommended_system_ram_gb: 1
+scheduler:
+  initial_parallel_generations: 1
+  maximum_parallel_generations: 2
+  allow_cpu_offload: false
+budgets:
+  minimum_vram_reserve_gb: 0
+  total_kv_cache_gb: 0

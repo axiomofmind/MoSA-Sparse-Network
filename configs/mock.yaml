@@ -1,0 +1,19 @@
+# Portable no-model configuration for dashboard development and CI.
+paths:
+  model_cache: null
+  artifacts: .sparse-data/mock/artifacts
+  logs: .sparse-data/mock/logs
+  runs: .sparse-data/mock/runs
+  indexes: .sparse-data/mock/indexes
+
+fleet:
+  roster: configs/rosters/minimal-mock.yaml
+  queue_capacity: 16
+  require_gpu_telemetry: false
+
+controller:
+  request_timeout_seconds: 30
+  telemetry_interval_seconds: 0.2
+
+routing:
+  use_cases: configs/usecases.yaml

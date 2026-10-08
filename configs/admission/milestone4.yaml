@@ -1,0 +1,110 @@
+schema: sparse-network-admission-suite.v1
+
+endpoints:
+  lfm25-1.2b:
+    - id: classification_json
+      prompt: >-
+        Return only JSON with keys category and confidence. Classify:
+        The build fails because a Python import is missing.
+      checks:
+        - json_keys: [category, confidence]
+    - id: extraction
+      prompt: >-
+        Extract only the email address from: Contact Ada at ada@example.test
+        before Friday.
+      checks:
+        - contains_all: [ada@example.test]
+    - id: rewriting
+      prompt: "Rewrite politely in one sentence: Send the logs now."
+      checks:
+        - contains_any: [please, could, would]
+    - id: compression
+      prompt: >-
+        Compress to at most eight words: The deployment completed successfully
+        after the missing environment variable was configured.
+      checks:
+        - maximum_words: 8
+    - id: explicit_escalation
+      prompt: >-
+        You only classify and extract. A user asks for a binding medical
+        diagnosis. Return only JSON with action set to escalate and a reason.
+      checks:
+        - json_keys: [action, reason]
+        - contains_all: [escalate]
+
+  nemotron-4b:
+    - id: contradiction
+      prompt: >-
+        State one concise contradiction: Claim: the function always returns an
+        integer. Evidence: on missing input it returns None.
+      checks:
+        - contains_all: [none, integer]
+    - id: code_review
+      prompt: "Review this Python for its primary bug: def ratio(a, b): return a / b"
+      checks:
+        - contains_any: [zero, division, validate]
+    - id: tool_plan_review
+      prompt: >-
+        Review this plan for the missing safety step: Delete the production
+        database, recreate it, then test the service.
+      checks:
+        - contains_any: [backup, approval, destructive, rollback]
+    - id: unsupported_claim
+      prompt: >-
+        Critique: The deployment is healthy because the process started.
+        Evidence: no health check or request was run.
+      checks:
+        - contains_any: [health check, insufficient, unsupported, evidence]
+
+  gemma-e2b-vision:
+    - id: screenshot
+      prompt: State the build status, exact error, passed tests, and import errors.
+      images: [.sparse-data/fixtures/vision/screenshot.png]
+      checks:
+        - contains_all: [build failed, sparse_utils, "3", "1"]
+    - id: document
+      prompt: Extract the invoice identifier and total.
+      images: [.sparse-data/fixtures/vision/document.png]
+      checks:
+        - contains_all: [INV-204, "42.50"]
+    - id: chart
+      prompt: Which colored bar is highest and what is its value?
+      images: [.sparse-data/fixtures/vision/chart.png]
+      checks:
+        - contains_all: [green, "55"]
+    - id: general_image
+      prompt: Identify both colored shapes.
+      images: [.sparse-data/fixtures/vision/general.png]
+      checks:
+        - contains_all: [blue, circle, red, square]
+    - id: diagram
+      prompt: List the three boxes in arrow order.
+      images: [.sparse-data/fixtures/vision/diagram.png]
+      checks:
+        - contains_all: [request, router, gemma]
+    - id: multi_image
+      prompt: From the first image give the invoice total; from the second give the highest bar.
+      images:
+        - .sparse-data/fixtures/vision/document.png
+        - .sparse-data/fixtures/vision/chart.png
+      checks:
+        - contains_all: ["42.50", green, "55"]
+
+  qwen3-8b-fp8:
+    - id: reasoning
+      prompt: "Solve and return only the integer: 6 * 7"
+      checks:
+        - contains_all: ["42"]
+    - id: reconciliation
+      prompt: >-
+        Reconcile in one sentence: A says deployment succeeded. B says the
+        health check returned HTTP 503.
+      checks:
+        - contains_all: [503]
+        - contains_any: [unavailable, unhealthy, failure, despite]
+    - id: verification
+      prompt: >-
+        Verify this claim and state valid or invalid with one reason:
+        All tests passed. Evidence: 9 passed and 2 failed.
+      checks:
+        - contains_any: [invalid, false, not all]

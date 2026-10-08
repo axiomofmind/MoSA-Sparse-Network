@@ -1,0 +1,28 @@
+schema: sparse-network-retrieval-suite.v1
+
+documents:
+  - id: operations
+    path: .sparse-data/fixtures/retrieval/operations.md
+  - id: spanish
+    path: .sparse-data/fixtures/retrieval/spanish.md
+  - id: german
+    path: .sparse-data/fixtures/retrieval/german.md
+  - id: research
+    path: .sparse-data/fixtures/retrieval/research.md
+
+queries:
+  - id: cooling_color
+    text: Which hue identifies the emergency shutoff control?
+    expected_document: operations.md
+  - id: secure_port
+    text: Where do encrypted client connections enter the service?
+    expected_document: operations.md
+  - id: spanish_backup
+    text: ¿Cuándo se ejecutan las copias de seguridad y cuánto tiempo se conservan?
+    expected_document: spanish.md
+  - id: german_sensor
+    text: Welcher Messfühler löst den Alarm aus?
+    expected_document: german.md
+  - id: experiment_temperature
+    text: What temperature was used for the catalyst trial?
+    expected_document: research.md
