@@ -1,38 +1,64 @@
 # MoSA Sparse Network
 
-MoSA Sparse Network is a portable controller and dashboard project for routing work
-across a bounded fleet of local models. The project includes provisional 16 GB
-and 24 GB profiles plus a measured 32 GB multimodal reference system.
+MoSA Sparse Network lets one local AI application coordinate several smaller,
+specialized models. Routine work stays on fast, low-memory models, while OCR,
+vision, retrieval, critique, and larger reasoning models are used only when a
+task needs them. The goal is useful private AI workflows on a single workstation
+without loading every model at once or sending files to a hosted service.
 
-The controller includes bounded top-1, diverse top-2, and MoSA execution,
-AntiDoom loop rejection, a
-measured Qwen3.8-27B swap/restoration path, and a versioned loopback API, CLI,
-typed client, replayable event stream, role-aware dashboard, confirmed fleet
-controls, portable hardware-profile switching, and evaluation comparisons.
+The project includes a local dashboard, a model controller, task workflows,
+hardware-aware model swapping, and evidence-preserving follow-up tasks.
 
-## Development quick start
+## What it can do
+
+- Work with source code, logs, screenshots, and local repositories.
+- Answer questions about local documents with fast or complex OCR.
+- Search and synthesize local sources with linked evidence.
+- Investigate incidents and technical problems using bounded diagnostic steps.
+- Extract structured batches and meeting decisions or action items.
+- Escalate difficult work to larger models without keeping every model loaded.
+
+## How it works
+
+The controller selects a small model for ordinary work and adds a second model,
+specialist, or large verifier only when the workflow requires it. Every run has a
+finite stage limit, explicit resource checks, and a recorded evidence trail.
+Hardware profiles define which models stay resident and which larger models are
+loaded temporarily. Repetition detection prevents unproductive retry loops.
+
+The included 16 GB and 24 GB profiles are provisional. The 32 GB multimodal
+profile and its Qwen3.8-27B swap-and-restore path have been measured on the
+reference system.
+
+## Quick start
+
+Install Python 3.12 and `uv`, then create the project environment:
 
 ```powershell
 uv sync
-uv run sparse-network doctor
-uv run sparse-network models verify mock-echo
-uv run sparse-network smoke mock-echo --prompt "hello"
-uv run ruff check .
-uv run mypy
-uv run pytest
 ```
 
-On Windows, launch the controller and dashboard from PowerShell:
+On Windows, start the controller and dashboard from PowerShell:
 
 ```powershell
 .\scripts\start_sparse.ps1
 ```
 
-The launcher uses `config.local.yaml`, copies the connection
-token to the clipboard, and opens the dashboard when ready. Paste the token
-into the dashboard's Connect dialog. Keep the terminal open; press Ctrl+C to
-stop. Load your models with **Models & Hardware > Start fleet** after connecting.
-The dashboard starts without waiting for model loading. It requires `uv` and works from any current directory when invoked by
+The launcher copies the connection token to the clipboard and opens the local
+dashboard. Paste the token into the **Connect** dialog, then use **Models &
+Hardware > Start fleet** to load the configured models. Keep the terminal open;
+press Ctrl+C to stop.
+
+For a model-free check of the installation, run:
+
+```powershell
+uv run sparse-network doctor
+uv run sparse-network models verify mock-echo
+uv run sparse-network smoke mock-echo --prompt "hello"
+```
+
+The launcher uses `config.local.yaml`. The dashboard starts without waiting for
+model loading and works from any current directory when the script is invoked by
 its full path.
 
 Use `-Mock` for a model-free demo, `-Config <path>` for another configuration
@@ -65,6 +91,8 @@ uv run sparse-network --config configs/mock.yaml api serve --load-fleet
 Open `http://127.0.0.1:8765/dashboard/`. See
 [`dashboard/README.md`](dashboard/README.md) for the views, security boundary,
 permissions, and repeatable smoke tests.
+
+### Configure real models
 
 For a real local endpoint, copy `config.example.yaml` to `config.local.yaml`,
 set the local cache and runtime details, then run:
@@ -102,6 +130,8 @@ snapshot through Hugging Face. The destination defaults to the ignored
 overrides that default, and `--cache-dir <path>` takes precedence over both.
 Model acquisition remains explicit; normal startup never downloads weights.
 
+### Model admission and optional runtimes
+
 Milestone 4 admissions use deterministic frozen cases:
 
 ```powershell
@@ -113,6 +143,8 @@ uv run sparse-network admission gemma-e2b-vision --suite configs/admission/miles
 Qwen FP8 needs an isolated CUDA runtime and the pinned fine-grained FP8 kernel.
 Create it explicitly with `scripts/setup_qwen_fp8.ps1 -CacheDir <hub-cache>`;
 ordinary startup never downloads weights or kernels.
+
+## Retrieval and decision routing
 
 CPU retrieval is available through the same CLI:
 
@@ -155,6 +187,8 @@ Create a separate CPU embedding environment with
 `runtime_executables.embeddings` at its Python executable in local
 configuration. Model acquisition remains a separate explicit action.
 
+## Running the network
+
 Run one request with the complete resident roster (the command loads and safely
 shuts down the fleet around it):
 
@@ -186,6 +220,8 @@ handoffs and coordination decisions in the execution trace. Aggregate saved
 traces with `scripts/evaluate_coordination.py`; see
 `docs/coordination-evaluation.md` for the policy and metrics.
 
+## Hardware profiles
+
 Hardware-tier rosters are data files and do not contain local model paths:
 
 - `configs/rosters/reference-16gb.yaml`: four small specialists plus Gemma 12B.
@@ -200,6 +236,8 @@ layout has been measured at 17.06 GB total VRAM on the reference machine.
 The controller binds its exclusive verifier to the selected roster: Q4 on the
 16/24 GB profiles and Q8 on both 32 GB profiles.
 
+## Task workflows
+
 Use-case workflows are available from the dashboard and the versioned
 `/v1/use-cases` API. Describe an outcome on Home: a confidently matched, ready
 request opens its task thread and starts immediately, while missing information
@@ -212,6 +250,17 @@ without invoking a model. See
 `docs/task-first-workspace.md` for the guided workspace, contracts, permissions,
 and verification commands.
 
+## Testing
+
+Run the portable release checks with:
+
+```powershell
+uv run ruff check .
+uv run mypy
+uv run pytest
+node --test dashboard/tests/*.test.mjs
+```
+
 Real-model integration tests are opt-in:
 
 ```powershell
@@ -220,6 +269,8 @@ uv run pytest -q tests/test_real_qwen_opt_in.py
 $env:SPARSE_RUN_MILESTONE4_TESTS = "1"
 uv run pytest -q tests/test_real_milestone4_opt_in.py
 ```
+
+## Repository scope
 
 Model weights, local configuration, user artifacts, logs, and run data are not
 stored in this repository. The model sources and pinned revisions are also
