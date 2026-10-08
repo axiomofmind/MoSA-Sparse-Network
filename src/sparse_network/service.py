@@ -620,6 +620,7 @@ class ControllerService:
                     "capabilities": list(endpoint.capabilities),
                     "context_size": endpoint.context_size,
                     "max_output_tokens": endpoint.max_output_tokens,
+                    "max_input_tokens": endpoint.max_input_tokens,
                     "admission": copy.deepcopy(endpoint.admission),
                     "license": copy.deepcopy(endpoint.license),
                     "proposed_budget": copy.deepcopy(endpoint.proposed_budget),
@@ -1393,6 +1394,10 @@ class ControllerService:
         }
 
     def run_swap(self, payload: dict[str, Any]) -> dict[str, Any]:
+        if not self.fleet.exclusive_swap_endpoint_ids:
+            raise ValueError(
+                "the selected hardware profile does not provide a 27B escalation model"
+            )
         return self.swap.run(
             SwapRequest(
                 prompt=str(payload.get("prompt", "")),
@@ -1416,7 +1421,7 @@ class ControllerService:
         router = StaticRouter(
             self.config,
             self.registry,
-            resident_endpoint_ids=set(self.fleet.entries),
+            resident_endpoint_ids=set(self.fleet.resident_endpoint_ids),
         )
         execution = ExecutionRequest(
             route=RouteRequest(

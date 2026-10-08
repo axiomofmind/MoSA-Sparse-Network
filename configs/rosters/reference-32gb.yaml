@@ -15,4 +15,4 @@ optional:
   - pp-ocrv6-medium
   - paddleocr-vl-1.6
 exclusive_swap:
-  - qwen38-27b
+  - qwen38-27b-q4

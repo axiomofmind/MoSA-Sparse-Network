@@ -51,6 +51,7 @@ class EndpointDefinition:
     admission: dict[str, Any]
     license: dict[str, Any]
     max_input_characters: int = 0
+    max_input_tokens: int = 0
     proposed_budget: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -190,6 +191,7 @@ def _endpoint_from_mapping(endpoint_id: str, data: dict[str, Any]) -> EndpointDe
         context_size=int(data.get("context_size", 0)),
         max_output_tokens=int(data.get("max_output_tokens", 0)),
         max_input_characters=int(data.get("max_input_characters", 0)),
+        max_input_tokens=int(data.get("max_input_tokens", 0)),
         environment={str(key): str(value) for key, value in environment.items()},
         telemetry_gpu_index=telemetry_gpu_index,
         admission=copy.deepcopy(data.get("admission", {})),

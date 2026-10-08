@@ -366,6 +366,34 @@ def test_diverse_top2_requires_frozen_trigger_and_runs_two_families(tmp_path: Pa
     manager.shutdown()
 
 
+def test_workflow_checks_only_the_selected_lane_against_the_active_profile(
+    tmp_path: Path,
+) -> None:
+    manager, executor = _system(tmp_path)
+    manager.load_all()
+    manager.entries.pop("reason-worker")
+    workflows = WorkflowExecutor(manager, executor.router)
+
+    top2 = workflows.run(
+        WorkflowRequest(
+            execution=ExecutionRequest(route=RouteRequest(prompt="general request")),
+            mode="top-2",
+            trigger="disputed",
+        )
+    )
+    assert top2.status == "accepted"
+
+    with pytest.raises(RequestFailedError, match="models are not assigned: reason-worker"):
+        workflows.run(
+            WorkflowRequest(
+                execution=ExecutionRequest(route=RouteRequest(prompt="general request")),
+                mode="mosa",
+                trigger="disputed",
+            )
+        )
+    manager.shutdown()
+
+
 def test_mosa_early_stop_and_bounded_three_stage_reconciliation(tmp_path: Path) -> None:
     manager, executor = _system(tmp_path)
     manager.load_all()

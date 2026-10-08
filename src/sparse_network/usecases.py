@@ -1288,10 +1288,9 @@ class UseCaseManager:
         prompt: str,
         evidence_ids: tuple[str, ...],
     ) -> tuple[tuple[str, ...], bool]:
-        byte_limit = endpoint.context_size - endpoint.max_output_tokens
-        if endpoint.max_input_characters:
-            byte_limit = min(byte_limit, endpoint.max_input_characters)
-        remaining = max(0, byte_limit - len(prompt.encode("utf-8")) - 300)
+        input_token_budget = endpoint.context_size - endpoint.max_output_tokens
+        character_limit = endpoint.max_input_characters or input_token_budget * 2
+        remaining = max(0, character_limit - len(prompt) - 300)
         query_terms = {
             term.casefold()
             for term in re.findall(r"[A-Za-z0-9][A-Za-z0-9_.:/+-]{2,}", prompt)
@@ -1307,7 +1306,7 @@ class UseCaseManager:
                 )
             }
             overhead = 100 + len(str(record.metadata).encode("utf-8"))
-            required = len(evidence_text.encode("utf-8")) + overhead
+            required = len(evidence_text) + overhead
             candidates.append((len(query_terms & evidence_terms), ordinal, artifact_id, required))
         candidates.sort(key=lambda candidate: (-candidate[0], candidate[1]))
         selected: list[str] = []

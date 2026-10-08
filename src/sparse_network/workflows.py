@@ -169,19 +169,13 @@ class WorkflowExecutor:
                 f"Workflow coordination policy has unfrozen triggers {unknown_policy_triggers}"
             )
         known = {endpoint.id for endpoint in self.manager.registry.all()}
-        resident = set(self.manager.entries)
         for mode, mapping in (("top-2", self.top2), ("mosa", self.mosa)):
             for lane, endpoints in mapping.items():
                 if len(set(endpoints)) != len(endpoints):
                     raise ConfigurationError(f"{mode} lane {lane} repeats an endpoint")
                 missing = set(endpoints) - known
-                nonresident = set(endpoints) - resident
                 if missing:
                     raise ConfigurationError(f"{mode} lane {lane} has unknown endpoints {missing}")
-                if nonresident:
-                    raise ConfigurationError(
-                        f"{mode} lane {lane} has nonresident endpoints {nonresident}"
-                    )
             if mode == "top-2":
                 for lane, endpoints in mapping.items():
                     families = {self.manager.registry.get(value).family for value in endpoints}
@@ -869,6 +863,25 @@ class WorkflowExecutor:
         if endpoints is None:
             raise RequestFailedError(
                 f"No {request.mode} workflow is admitted for lane {decision.lane}"
+            )
+        unassigned = [
+            endpoint_id for endpoint_id in endpoints if endpoint_id not in self.manager.entries
+        ]
+        if unassigned:
+            raise RequestFailedError(
+                f"{request.mode} workflow lane {decision.lane} is unavailable in hardware "
+                f"profile {self.manager.roster_id}; models are not assigned: "
+                f"{', '.join(unassigned)}"
+            )
+        not_ready = [
+            endpoint_id
+            for endpoint_id in endpoints
+            if self.manager.entries[endpoint_id].state.value not in {"ready", "busy"}
+        ]
+        if not_ready:
+            raise RequestFailedError(
+                f"{request.mode} workflow lane {decision.lane} needs models loaded first: "
+                f"{', '.join(not_ready)}"
             )
         graph = self._plan(decision, request.mode, endpoints)
         self.manager.event_log.emit(

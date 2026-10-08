@@ -1,5 +1,5 @@
-id: nvidia-24gb-multimodal-gemma12
-display_name: 24 GB Standard (Gemma 12B)
+id: nvidia-24gb-multimodal
+display_name: 24 GB Standard
 variant: standard
 hardware_profile: nvidia-24gb
 validation_state: provisional_requires_matching_hardware
@@ -11,6 +11,8 @@ resident:
   - nemotron-4b
   - gemma-e2b-vision
   - qwen3-8b-fp8
+optional:
   - gemma4-12b-qat
-exclusive_swap:
-  - qwen38-27b-q4
+  - pp-ocrv6-medium
+  - paddleocr-vl-1.6
+exclusive_swap: []

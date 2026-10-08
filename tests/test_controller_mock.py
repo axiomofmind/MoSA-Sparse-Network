@@ -64,6 +64,23 @@ def test_oversized_prompt_is_rejected_before_runtime_start(tmp_path: Path) -> No
         raise AssertionError("oversized prompt was accepted")
 
 
+def test_runtime_token_count_replaces_utf8_byte_estimate(tmp_path: Path) -> None:
+    config = make_test_config(tmp_path, endpoint=mock_endpoint())
+    controller = Controller(config, ModelRegistry.load(config))
+    result = controller.smoke(endpoint_id="mock-echo", prompt="🙂" * 30)
+    assert result.envelope.status == "answer"
+    assert result.envelope.resource_usage.input_tokens == 1
+
+
+def test_runtime_token_count_rejects_prompt_over_context_budget(tmp_path: Path) -> None:
+    endpoint = mock_endpoint()
+    endpoint["definition"]["max_input_characters"] = 1000
+    config = make_test_config(tmp_path, endpoint=endpoint)
+    controller = Controller(config, ModelRegistry.load(config))
+    with pytest.raises(ValueError, match="needs 97 tokens.*budget is 96"):
+        controller.smoke(endpoint_id="mock-echo", prompt=" ".join(["x"] * 97))
+
+
 def test_mock_request_can_be_cancelled(tmp_path: Path) -> None:
     config = make_test_config(tmp_path, endpoint=mock_endpoint())
     controller = Controller(config, ModelRegistry.load(config))

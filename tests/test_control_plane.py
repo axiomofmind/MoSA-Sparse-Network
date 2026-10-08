@@ -251,6 +251,22 @@ def test_swap_coordinator_defaults_to_roster_declared_endpoint(tmp_path: Path) -
     manager.shutdown()
 
 
+def test_service_rejects_swap_when_profile_has_no_exclusive_endpoint(
+    tmp_path: Path,
+) -> None:
+    config = _config(tmp_path)
+    roster_path = Path(str(config.data["fleet"]["roster"]))
+    roster = yaml.safe_load(roster_path.read_text(encoding="utf-8"))
+    roster["exclusive_swap"] = []
+    roster_path.write_text(yaml.safe_dump(roster), encoding="utf-8")
+    service = ControllerService(config, ModelRegistry.load(config))
+    try:
+        with pytest.raises(ValueError, match="does not provide a 27B escalation model"):
+            service.run_swap({"prompt": "do not escalate"})
+    finally:
+        service.fleet.shutdown()
+
+
 def test_api_auth_request_replay_and_state_reconstruction(tmp_path: Path) -> None:
     config = _config(tmp_path)
     registry = ModelRegistry.load(config)

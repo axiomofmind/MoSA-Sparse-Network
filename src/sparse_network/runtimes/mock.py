@@ -22,6 +22,16 @@ class MockAdapter(RuntimeAdapter):
         self.state = RuntimeState.STARTING
         self.state = RuntimeState.READY
 
+    def count_input_tokens(
+        self,
+        *,
+        prompt: str,
+        images: tuple[Path, ...],
+        timeout_seconds: float,
+    ) -> int:
+        del images, timeout_seconds
+        return max(1, len(prompt.split()))
+
     def generate(
         self,
         *,

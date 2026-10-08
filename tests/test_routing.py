@@ -123,10 +123,12 @@ def test_router_scores_are_bounded_and_have_deterministic_fallback() -> None:
     assert not invalid.router_scores_used
 
 
-def test_context_fallback_and_unavailable_audio_are_controlled() -> None:
+def test_context_limits_and_unavailable_audio_are_controlled() -> None:
     router = _router()
-    context = router.route(RouteRequest(prompt="@route:general " + "x" * 6500))
-    assert context.endpoint == "qwen3-8b-fp8"
+    context = router.route(RouteRequest(prompt="@route:general " + "x" * 20000))
+    assert context.endpoint == "qwen35-4b"
+    oversized = router.route(RouteRequest(prompt="@route:general " + "x" * 40000))
+    assert oversized.rejected
     audio = router.route(RouteRequest(prompt="Transcribe", audio=(Path("audio.wav"),)))
     assert audio.rejected
     assert audio.lane == "audio_transcription"

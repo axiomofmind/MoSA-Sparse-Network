@@ -78,6 +78,12 @@ class TransformersAdapter(RuntimeAdapter):
             command.append("--thinking")
         if "image" in self.endpoint.modalities:
             command.append("--vision")
+        command.extend(
+            [
+                "--attention-implementation",
+                str(runtime.get("attention_implementation", "eager")),
+            ]
+        )
         return command
 
     def _read_messages(self) -> None:
@@ -216,6 +222,48 @@ class TransformersAdapter(RuntimeAdapter):
         finally:
             if self.state == RuntimeState.BUSY:
                 self.state = RuntimeState.READY
+
+    def count_input_tokens(
+        self,
+        *,
+        prompt: str,
+        images: tuple[Path, ...],
+        timeout_seconds: float,
+    ) -> int | None:
+        if self.state != RuntimeState.READY:
+            raise EndpointStateError(f"Endpoint is not ready: {self.state}")
+        process = self._process
+        if process is None or process.stdin is None:
+            raise EndpointStateError("Transformers worker has no input stream")
+        process.stdin.write(
+            json.dumps(
+                {
+                    "command": "count_tokens",
+                    "prompt": prompt,
+                    "images": [str(image) for image in images],
+                }
+            )
+            + "\n"
+        )
+        process.stdin.flush()
+        deadline = monotonic() + timeout_seconds
+        while monotonic() < deadline:
+            if process.poll() is not None and self._messages.empty():
+                raise RequestFailedError(
+                    f"Transformers worker exited with {process.returncode}: {self._log_tail()}"
+                )
+            try:
+                message = self._next_message(min(0.1, deadline - monotonic()))
+            except TimeoutError:
+                continue
+            if message.get("event") == "error":
+                raise RequestFailedError(
+                    f"Transformers tokenization failed: {message.get('error')}\n"
+                    f"{message.get('traceback', '')}"
+                )
+            if message.get("event") == "token_count":
+                return int(message["input_tokens"])
+        raise RequestFailedError("Transformers tokenization timed out")
 
     def cancel(self) -> None:
         process = self._process

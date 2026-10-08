@@ -173,6 +173,43 @@ class LlamaCppAdapter(RuntimeAdapter):
             f"llama.cpp startup timed out ({last_error}). Log tail:\n{tail}"
         )
 
+    def count_input_tokens(
+        self,
+        *,
+        prompt: str,
+        images: tuple[Path, ...],
+        timeout_seconds: float,
+    ) -> int:
+        if self.state != RuntimeState.READY:
+            raise EndpointStateError(f"Endpoint is not ready: {self.state}")
+        connection = http.client.HTTPConnection(self.host, self.port, timeout=timeout_seconds)
+        payload = json.dumps({"content": prompt, "add_special": True}).encode("utf-8")
+        try:
+            connection.request(
+                "POST",
+                "/tokenize",
+                body=payload,
+                headers={"Content-Type": "application/json"},
+            )
+            response = connection.getresponse()
+            body = response.read()
+            if response.status != 200:
+                raise RequestFailedError(
+                    f"llama.cpp tokenization returned HTTP {response.status}: "
+                    f"{body.decode('utf-8', errors='replace')[:1000]}"
+                )
+            decoded = json.loads(body)
+            tokens = decoded.get("tokens")
+            if not isinstance(tokens, list):
+                raise RequestFailedError("llama.cpp tokenization returned no token list")
+            chat_reserve = int(self.endpoint.runtime.get("chat_template_token_reserve", 64))
+            image_reserve = int(self.endpoint.runtime.get("image_token_reserve", 2048))
+            return len(tokens) + chat_reserve + len(images) * image_reserve
+        except (OSError, json.JSONDecodeError) as exc:
+            raise RequestFailedError(f"llama.cpp tokenization failed: {exc}") from exc
+        finally:
+            connection.close()
+
     def generate(
         self,
         *,

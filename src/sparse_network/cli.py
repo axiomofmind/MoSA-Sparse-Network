@@ -768,7 +768,7 @@ def main(argv: list[str] | None = None) -> int:
             router = StaticRouter(
                 config,
                 registry,
-                resident_endpoint_ids=set(manager.entries),
+                resident_endpoint_ids=set(manager.resident_endpoint_ids),
             )
             executor = Top1Executor(manager, router)
             loaded = None

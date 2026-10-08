@@ -35,8 +35,11 @@ for line in sys.stdin:
     request = json.loads(line)
     if request.get('command') == 'shutdown':
         raise SystemExit(0)
-    print(json.dumps({'event': 'result', 'text': 'worker response', 'input_tokens': 2,
-                      'output_tokens': 2, 'finish_reason': 'stop'}), flush=True)
+    if request.get('command') == 'count_tokens':
+        print(json.dumps({'event': 'token_count', 'input_tokens': 7}), flush=True)
+    else:
+        print(json.dumps({'event': 'result', 'text': 'worker response', 'input_tokens': 2,
+                          'output_tokens': 2, 'finish_reason': 'stop'}), flush=True)
 """,
         encoding="utf-8",
     )
@@ -55,6 +58,7 @@ def test_transformers_worker_lifecycle(tmp_path: Path) -> None:
         shutdown_grace_seconds=1,
     )
     adapter.start()
+    assert adapter.count_input_tokens(prompt="hello", images=(), timeout_seconds=3) == 7
     result = adapter.generate(
         prompt="hello",
         images=(),

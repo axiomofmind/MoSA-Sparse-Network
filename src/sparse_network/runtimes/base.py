@@ -55,6 +55,17 @@ class RuntimeAdapter(ABC):
     ) -> RuntimeResult:
         raise NotImplementedError
 
+    def count_input_tokens(
+        self,
+        *,
+        prompt: str,
+        images: tuple[Path, ...],
+        timeout_seconds: float,
+    ) -> int | None:
+        """Return the runtime's input-token count when its tokenizer is available."""
+
+        return None
+
     @abstractmethod
     def cancel(self) -> None:
         raise NotImplementedError

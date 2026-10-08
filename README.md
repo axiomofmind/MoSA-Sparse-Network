@@ -224,17 +224,32 @@ traces with `scripts/evaluate_coordination.py`; see
 
 Hardware-tier rosters are data files and do not contain local model paths:
 
-- `configs/rosters/reference-16gb.yaml`: four small specialists plus Gemma 12B.
-- `configs/rosters/reference-24gb.yaml`: the five-agent baseline plus Gemma 12B.
+- `configs/rosters/reference-16gb.yaml`: LFM 1.2B dispatch, Qwen 4B general
+  work, Nemotron 4B critique, and Gemma E2B vision stay resident. Gemma 12B
+  and both OCR paths load only when a task requires them. This tier does not
+  advertise a 27B swap.
+- `configs/rosters/reference-24gb.yaml`: adds Qwen 8B reasoning to the resident
+  fleet. Gemma 12B and both OCR paths remain on demand. This tier does not
+  advertise a 27B swap until it is qualified on matching hardware.
 - `configs/rosters/reference-32gb-gemma12.yaml`: the measured six-resident tier
   with the Qwen 27B Q8 quality-control swap; this is the default 32 GB profile.
 - `configs/rosters/reference-32gb.yaml`: the measured five-resident 32 GB Lean
-  variant, retained for lower steady-state memory use.
+  variant with the smaller Qwen 27B Q4 swap.
 
 The 16/24 GB profiles require validation on matching cards. The six-resident
 layout has been measured at 17.06 GB total VRAM on the reference machine.
-The controller binds its exclusive verifier to the selected roster: Q4 on the
-16/24 GB profiles and Q8 on both 32 GB profiles.
+Fast and complex OCR are on-demand endpoints rather than startup residents.
+The controller binds its exclusive verifier to the selected roster: none on
+16/24 GB, Q4 on 32 GB Lean, and Q8 on 32 GB Standard.
+
+Working context is sized by role: 8K for dispatch, 12K for Qwen 8B reasoning,
+and 16K for general generation, critique, vision, OCR, and large verification.
+The controller asks each active runtime to count tokens with its own tokenizer
+before generation; `max_input_characters` remains a separate request-size guard.
+This preserves usable document and code context without treating every UTF-8
+byte as a token. Qwen 8B has a measured 4,608-token input ceiling in the
+resident 24/32 GB fleet. KV-cache budgets are 8/12/16 GB for the 16/24/32 GB
+tiers.
 
 ## Task workflows
 

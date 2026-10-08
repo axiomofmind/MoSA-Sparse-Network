@@ -166,15 +166,11 @@ class Controller:
                 f"prompt has {len(runtime_prompt)} characters after evidence; endpoint limit is "
                 f"{endpoint.max_input_characters}"
             )
-        conservative_input_budget = endpoint.context_size - endpoint.max_output_tokens
-        encoded_size = len(runtime_prompt.encode("utf-8"))
-        if conservative_input_budget <= 0:
+        input_token_budget = endpoint.context_size - endpoint.max_output_tokens
+        if endpoint.max_input_tokens:
+            input_token_budget = min(input_token_budget, endpoint.max_input_tokens)
+        if input_token_budget <= 0:
             raise ValueError("endpoint output limit leaves no input context")
-        if encoded_size > conservative_input_budget:
-            raise ValueError(
-                f"prompt needs at most {encoded_size} conservative token slots; "
-                f"endpoint input budget is {conservative_input_budget}"
-            )
         if images and "image" not in endpoint.modalities:
             raise ValueError(f"endpoint {endpoint.id} does not accept image input")
         controller_config = self.config.data.get("controller", {})
@@ -266,6 +262,7 @@ class Controller:
         status = "failed"
         error: str | None = None
         result = None
+        counted_input_tokens: int | None = None
         repetition: dict[str, object] = {
             "detected": False,
             "start": None,
@@ -281,6 +278,16 @@ class Controller:
             "parameters": self.repetition_policy.to_dict(),
         }
         try:
+            counted_input_tokens = runtime.count_input_tokens(
+                prompt=runtime_prompt,
+                images=tuple(resolved_images),
+                timeout_seconds=min(request_timeout, 30),
+            )
+            if counted_input_tokens is not None and counted_input_tokens > input_token_budget:
+                raise ValueError(
+                    f"prompt needs {counted_input_tokens} tokens after evidence and framing; "
+                    f"endpoint input budget is {input_token_budget}"
+                )
             result = runtime.generate(
                 prompt=runtime_prompt,
                 images=tuple(resolved_images),
@@ -379,7 +386,11 @@ class Controller:
             repetition=repetition,
             escalation={"requested": False, "reason": None, "minimum_tier": None},
             resource_usage=ResourceUsage(
-                input_tokens=result.input_tokens if result else 0,
+                input_tokens=(
+                    result.input_tokens
+                    if result
+                    else counted_input_tokens or 0
+                ),
                 output_tokens=result.output_tokens if result else 0,
                 elapsed_ms=snapshot.elapsed_ms,
                 peak_vram_bytes=snapshot.peak_vram_bytes,

@@ -243,16 +243,16 @@ endpoints:
       thinking: false
     modalities: [text]
     capabilities: [text_generation, coding, planning, tool_planning]
-    context_size: 8192
+    context_size: 16384
     max_output_tokens: 2048
-    max_input_characters: 6144
+    max_input_characters: 32768
     proposed_budget:
       reference_hardware: nvidia-32gb
       cold_load_ms: 15000
       request_ms: 30000
       process_ram_bytes: 4294967296
       incremental_vram_bytes: 1610612736
-      kv_cache_bytes: 1073741824
+      kv_cache_bytes: 2147483648
       request_workspace_bytes: 268435456
       vram_reclaim_tolerance_bytes: 67108864
       measured_on: 2026-08-23
@@ -284,16 +284,16 @@ endpoints:
       micro_batch_size: 128
     modalities: [text]
     capabilities: [classification, extraction, rewriting, compression, dispatch]
-    context_size: 4096
-    max_output_tokens: 512
-    max_input_characters: 3584
+    context_size: 8192
+    max_output_tokens: 768
+    max_input_characters: 16384
     proposed_budget:
       reference_hardware: nvidia-32gb
       cold_load_ms: 2000
       request_ms: 3000
       process_ram_bytes: 1342177280
       incremental_vram_bytes: 536870912
-      kv_cache_bytes: 268435456
+      kv_cache_bytes: 536870912
       request_workspace_bytes: 67108864
       vram_reclaim_tolerance_bytes: 536870912
       measured_on: 2026-08-23
@@ -327,16 +327,16 @@ endpoints:
       thinking: false
     modalities: [text]
     capabilities: [critique, contradiction_detection, plan_review, code_review]
-    context_size: 8192
-    max_output_tokens: 768
-    max_input_characters: 7424
+    context_size: 16384
+    max_output_tokens: 1024
+    max_input_characters: 32768
     proposed_budget:
       reference_hardware: nvidia-32gb
       cold_load_ms: 4000
       request_ms: 5000
       process_ram_bytes: 3758096384
       incremental_vram_bytes: 1610612736
-      kv_cache_bytes: 1073741824
+      kv_cache_bytes: 2147483648
       request_workspace_bytes: 268435456
       vram_reclaim_tolerance_bytes: 536870912
       measured_on: 2026-08-23
@@ -371,16 +371,16 @@ endpoints:
       thinking: false
     modalities: [text, image]
     capabilities: [visual_understanding, screenshot_analysis, document_vision, chart_analysis]
-    context_size: 8192
-    max_output_tokens: 768
-    max_input_characters: 7424
+    context_size: 16384
+    max_output_tokens: 1024
+    max_input_characters: 32768
     proposed_budget:
       reference_hardware: nvidia-32gb
       cold_load_ms: 6000
       request_ms: 10000
       process_ram_bytes: 2684354560
       incremental_vram_bytes: 4294967296
-      kv_cache_bytes: 1073741824
+      kv_cache_bytes: 2147483648
       request_workspace_bytes: 1073741824
       vram_reclaim_tolerance_bytes: 536870912
       measured_on: 2026-08-23
@@ -468,16 +468,17 @@ endpoints:
       ocr_prompt: "OCR:"
     modalities: [text, image]
     capabilities: [document_ocr, document_vision, visual_understanding]
-    context_size: 8192
-    max_output_tokens: 2048
-    max_input_characters: 6144
+    context_size: 16384
+    max_output_tokens: 4096
+    max_input_tokens: 4096
+    max_input_characters: 24576
     proposed_budget:
       reference_hardware: nvidia-32gb
       cold_load_ms: 10000
       request_ms: 30000
       process_ram_bytes: 4294967296
       incremental_vram_bytes: 4294967296
-      kv_cache_bytes: 1073741824
+      kv_cache_bytes: 2147483648
       request_workspace_bytes: 1073741824
       vram_reclaim_tolerance_bytes: 536870912
       measured_on: 2026-10-08
@@ -512,6 +513,7 @@ endpoints:
       adapter: transformers
       device: cuda:0
       gpu_memory_fraction: 0.75
+      attention_implementation: sdpa
       thinking: false
       kernel:
         repository: kernels-community/finegrained-fp8
@@ -519,16 +521,17 @@ endpoints:
         api_version: 4
     modalities: [text]
     capabilities: [reasoning, reconciliation, verification]
-    context_size: 8192
-    max_output_tokens: 768
-    max_input_characters: 7424
+    context_size: 12288
+    max_output_tokens: 2048
+    max_input_tokens: 4608
+    max_input_characters: 16000
     proposed_budget:
       reference_hardware: nvidia-32gb
       cold_load_ms: 10000
       request_ms: 30000
       process_ram_bytes: 2684354560
       incremental_vram_bytes: 10737418240
-      kv_cache_bytes: 2147483648
+      kv_cache_bytes: 3221225472
       request_workspace_bytes: 1073741824
       vram_reclaim_tolerance_bytes: 536870912
       measured_on: 2026-08-23
@@ -563,16 +566,16 @@ endpoints:
       thinking: false
     modalities: [text]
     capabilities: [maximum_quality, independent_solving, adjudication, reconciliation]
-    context_size: 4096
-    max_output_tokens: 512
-    max_input_characters: 3584
+    context_size: 16384
+    max_output_tokens: 2048
+    max_input_characters: 32768
     proposed_budget:
       reference_hardware: nvidia-32gb
       cold_load_ms: 20000
       request_ms: 120000
       process_ram_bytes: 34359738368
       incremental_vram_bytes: 8589934592
-      kv_cache_bytes: 1073741824
+      kv_cache_bytes: 4294967296
       request_workspace_bytes: 1073741824
       vram_reclaim_tolerance_bytes: 536870912
       measured_on: 2026-08-23
@@ -606,16 +609,16 @@ endpoints:
       thinking: false
     modalities: [text, image]
     capabilities: [verification, visual_understanding, reasoning, coding, tool_use]
-    context_size: 4096
-    max_output_tokens: 512
-    max_input_characters: 3584
+    context_size: 16384
+    max_output_tokens: 2048
+    max_input_characters: 32768
     proposed_budget:
       reference_hardware: nvidia-24gb-or-32gb
       cold_load_ms: 10000
       request_ms: 120000
       process_ram_bytes: 8589934592
       incremental_vram_bytes: 3221225472
-      kv_cache_bytes: 1073741824
+      kv_cache_bytes: 4294967296
       request_workspace_bytes: 1073741824
       vram_reclaim_tolerance_bytes: 536870912
       measured_on: 2026-08-23
@@ -629,7 +632,7 @@ endpoints:
 
   qwen38-27b-q4:
     display_name: Qwen3.8 27B UD-Q4_K_M
-    role: portable_exclusive_escalation_solver
+    role: lean_exclusive_escalation_solver
     family: qwen3.8
     source:
       type: huggingface
@@ -650,16 +653,16 @@ endpoints:
       thinking: false
     modalities: [text]
     capabilities: [maximum_quality, independent_solving, adjudication, reconciliation]
-    context_size: 4096
-    max_output_tokens: 512
-    max_input_characters: 3584
+    context_size: 16384
+    max_output_tokens: 2048
+    max_input_characters: 32768
     proposed_budget:
-      reference_hardware: nvidia-16gb-24gb-32gb
+      reference_hardware: nvidia-32gb
       cold_load_ms: 10000
       request_ms: 120000
       process_ram_bytes: 17179869184
       incremental_vram_bytes: 4294967296
-      kv_cache_bytes: 1073741824
+      kv_cache_bytes: 4294967296
       request_workspace_bytes: 1073741824
       vram_reclaim_tolerance_bytes: 536870912
       measured_on: 2026-10-08
@@ -669,5 +672,5 @@ endpoints:
       review_required: false
     admission:
       state: admitted
-      scope: portable_exclusive_swap_adjudication
+      scope: lean_32gb_exclusive_swap_adjudication
       basis: adjudication_quality_and_two_cycle_restoration_passed

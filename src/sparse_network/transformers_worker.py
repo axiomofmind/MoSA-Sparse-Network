@@ -22,6 +22,7 @@ def main() -> int:
     parser.add_argument("--memory-fraction", type=float, default=0.75)
     parser.add_argument("--thinking", action="store_true")
     parser.add_argument("--vision", action="store_true")
+    parser.add_argument("--attention-implementation", default="eager")
     args = parser.parse_args()
     try:
         import torch  # type: ignore[import-not-found]
@@ -52,6 +53,7 @@ def main() -> int:
                     dtype="auto",
                     device_map={"": args.device},
                     low_cpu_mem_usage=True,
+                    attn_implementation=args.attention_implementation,
                 )
                 tokenizer = processor.tokenizer
             else:
@@ -62,6 +64,7 @@ def main() -> int:
                     dtype="auto",
                     device_map={"": args.device},
                     low_cpu_mem_usage=True,
+                    attn_implementation=args.attention_implementation,
                 )
         model.eval()
         emit(
@@ -74,42 +77,51 @@ def main() -> int:
                 "reserved_bytes": torch.cuda.memory_reserved(device_index),
             }
         )
+
+        def prepare_inputs(request: dict[str, Any]) -> Any:
+            image_paths = [str(value) for value in request.get("images", [])]
+            if args.vision:
+                if processor is None or not image_paths:
+                    raise ValueError("vision generation requires at least one image")
+                content = [
+                    {"type": "image", "url": image_path}
+                    for image_path in image_paths
+                ]
+                content.append({"type": "text", "text": str(request["prompt"])})
+                prepared = processor.apply_chat_template(
+                    [{"role": "user", "content": content}],
+                    tokenize=True,
+                    add_generation_prompt=True,
+                    return_dict=True,
+                    return_tensors="pt",
+                ).to(args.device)
+                prepared.pop("token_type_ids", None)
+                return prepared
+            messages = [{"role": "user", "content": str(request["prompt"])}]
+            rendered = tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True,
+                enable_thinking=args.thinking,
+            )
+            return tokenizer(rendered, return_tensors="pt").to(args.device)
+
         for line in sys.stdin:
             try:
                 request = json.loads(line)
                 if request.get("command") == "shutdown":
                     emit({"event": "stopped"})
                     return 0
-                if request.get("command") != "generate":
+                if request.get("command") not in {"count_tokens", "generate"}:
                     raise ValueError("unknown worker command")
                 started = monotonic()
-                image_paths = [str(value) for value in request.get("images", [])]
-                if args.vision:
-                    if processor is None or not image_paths:
-                        raise ValueError("vision generation requires at least one image")
-                    content = [
-                        {"type": "image", "url": image_path}
-                        for image_path in image_paths
-                    ]
-                    content.append({"type": "text", "text": str(request["prompt"])})
-                    inputs = processor.apply_chat_template(
-                        [{"role": "user", "content": content}],
-                        tokenize=True,
-                        add_generation_prompt=True,
-                        return_dict=True,
-                        return_tensors="pt",
-                    ).to(args.device)
-                    inputs.pop("token_type_ids", None)
-                else:
-                    messages = [{"role": "user", "content": str(request["prompt"])}]
-                    rendered = tokenizer.apply_chat_template(
-                        messages,
-                        tokenize=False,
-                        add_generation_prompt=True,
-                        enable_thinking=args.thinking,
-                    )
-                    inputs = tokenizer(rendered, return_tensors="pt").to(args.device)
+                inputs = prepare_inputs(request)
                 input_tokens = int(inputs["input_ids"].shape[-1])
+                if request["command"] == "count_tokens":
+                    del inputs
+                    torch.cuda.empty_cache()
+                    emit({"event": "token_count", "input_tokens": input_tokens})
+                    continue
                 with torch.inference_mode():
                     output = model.generate(
                         **inputs,

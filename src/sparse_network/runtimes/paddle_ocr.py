@@ -45,3 +45,13 @@ class PaddleOcrAdapter(TransformersAdapter):
             "--device",
             str(self.endpoint.runtime.get("device", "gpu:0")),
         ]
+
+    def count_input_tokens(
+        self,
+        *,
+        prompt: str,
+        images: tuple[Path, ...],
+        timeout_seconds: float,
+    ) -> None:
+        del prompt, images, timeout_seconds
+        return None
