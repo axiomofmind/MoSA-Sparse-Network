@@ -289,6 +289,10 @@ $env:SPARSE_RUN_MILESTONE4_TESTS = "1"
 uv run pytest -q tests/test_real_milestone4_opt_in.py
 ```
 
+Manual setup, smoke, admission, and hardware-profiling utilities are cataloged
+in [`scripts/README.md`](scripts/README.md). They are not run during normal
+startup and write generated results only to ignored local data directories.
+
 ## Repository scope
 
 Model weights, local configuration, user artifacts, logs, and run data are not
