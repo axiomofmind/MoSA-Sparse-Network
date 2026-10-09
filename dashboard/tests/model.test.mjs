@@ -1,6 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { formatBytes, graphColumns, groupSwapEvents, percent, profileForSelection } from "../model.js";
+import {
+  fleetEndpointStatus,
+  formatBytes,
+  graphColumns,
+  groupSwapEvents,
+  percent,
+  profileForSelection,
+} from "../model.js";
 
 test("formats resource values and clamps percentages", () => {
   assert.equal(formatBytes(1024 ** 3), "1.0 GiB");
@@ -39,6 +46,29 @@ test("auto-selects the standard variant when the recommended tier is inactive", 
     ],
   };
   assert.equal(profileForSelection(catalog, "auto").id, "32-standard");
+});
+
+test("labels installed optional endpoints as available on demand", () => {
+  const status = fleetEndpointStatus(
+    "pp-ocrv6-medium",
+    { state: "unavailable" },
+    { artifact_state: "validated" },
+    { optional: ["pp-ocrv6-medium"] },
+  );
+  assert.deepEqual(status, {
+    label: "available on demand",
+    tone: "neutral",
+    onDemand: true,
+  });
+  assert.equal(
+    fleetEndpointStatus(
+      "missing-ocr",
+      { state: "unavailable" },
+      { artifact_state: "missing_or_invalid" },
+      { optional: ["missing-ocr"] },
+    ).label,
+    "unavailable",
+  );
 });
 
 test("groups ordered swap phases without inventing transitions", () => {

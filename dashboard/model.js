@@ -37,6 +37,16 @@ export function toneForState(state) {
   return "neutral";
 }
 
+export function fleetEndpointStatus(endpointId, entry = {}, model = {}, profile = {}) {
+  const state = String(entry.state || "unknown");
+  const optional = (profile.optional || []).includes(endpointId);
+  const artifactsReady = ["validated", "not_required"].includes(model.artifact_state);
+  if (state === "unavailable" && optional && artifactsReady) {
+    return { label: "available on demand", tone: "neutral", onDemand: true };
+  }
+  return { label: state, tone: toneForState(state), onDemand: false };
+}
+
 export function profileForSelection(catalog, selection) {
   const profiles = catalog?.profiles || [];
   if (selection === "auto") {

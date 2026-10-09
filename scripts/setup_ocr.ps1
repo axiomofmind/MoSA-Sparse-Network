@@ -17,5 +17,10 @@ uv pip install --python $python `
     transformers==5.15.1 `
     accelerate==1.14.0 `
     safetensors==0.8.0
+if ($LASTEXITCODE -ne 0) { throw "Failed to install the OCR runtime." }
+
+# PP-OCRv6 uses PaddleOCR's Transformers engine, not the Paddle inference engine.
+& $python -c "import torch, transformers; from paddleocr import PaddleOCR; print('OCR runtime imports verified')"
+if ($LASTEXITCODE -ne 0) { throw "OCR runtime imports failed." }
 
 Write-Host "OCR runtime ready at $python"

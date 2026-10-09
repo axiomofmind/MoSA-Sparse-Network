@@ -4,6 +4,7 @@ import {
   formatBytes,
   formatDate,
   formatDuration,
+  fleetEndpointStatus,
   graphColumns,
   groupSwapEvents,
   percent,
@@ -102,6 +103,10 @@ function activeProfile() {
   return profileForSelection(state.snapshot?.profiles, state.selection);
 }
 
+function appliedProfile() {
+  return state.snapshot?.profiles?.profiles?.find((profile) => profile.active) || null;
+}
+
 function systemStatus() {
   if (!state.connected || state.stale) {
     return { label: "Connection lost", detail: "Sparse cannot currently confirm local task state.", tone: "bad" };
@@ -121,9 +126,11 @@ function systemStatus() {
 
 function renderOverview() {
   const fleet = state.snapshot.fleet;
-  const endpoints = Object.entries(fleet.endpoints || {});
+  const active = appliedProfile();
+  const residentIds = new Set(active?.resident || []);
+  const endpoints = Object.entries(fleet.endpoints || {})
+    .filter(([id]) => !residentIds.size || residentIds.has(id));
   const ready = endpoints.filter(([, value]) => value.state === "ready").length;
-  const active = state.snapshot.profiles.profiles.find((profile) => profile.active);
   const used = fleet.current_vram_bytes;
   const total = fleet.total_vram_bytes;
   const recent = [...state.snapshot.events].reverse().slice(0, 8);
@@ -171,10 +178,12 @@ function profilePreview() {
 
 function renderFleet() {
   const fleet = state.snapshot.fleet;
+  const profile = appliedProfile();
   const rows = Object.entries(fleet.endpoints || {}).map(([id, value]) => {
     const model = modelFor(id);
+    const status = fleetEndpointStatus(id, value, model, profile || {});
     const actions = can("fleet:operate") ? `<div class="row-actions">${actionButton("Smoke", `data-fleet-op="smoke" data-endpoint="${escapeHtml(id)}"`)}${value.state === "ready" ? actionButton("Drain", `data-fleet-op="drain" data-endpoint="${escapeHtml(id)}"`) + actionButton("Unload", `data-fleet-op="unload" data-endpoint="${escapeHtml(id)}"`) + actionButton("Quarantine", `data-fleet-op="quarantine" data-endpoint="${escapeHtml(id)}"`, "danger") : ""}</div>` : "—";
-    return `<tr><td><a href="#model:${escapeHtml(id)}" data-detail-model="${escapeHtml(id)}"><strong>${escapeHtml(model.display_name)}</strong><small>${escapeHtml(id)}</small></a></td><td>${badge(value.state)}<small>${escapeHtml(model.admission?.state || "unreviewed")}</small></td><td>${escapeHtml(model.runtime?.adapter || "—")}<small>${escapeHtml(model.runtime?.artifact_class || "")}</small></td><td>${escapeHtml(model.source?.revision || "builtin")}</td><td>${formatBytes(value.loaded_process_ram_bytes)}<small>peak req ${formatBytes(value.peak_request_ram_bytes)}</small></td><td>${formatBytes(value.incremental_vram_bytes)}<small>peak req ${formatBytes(value.peak_request_vram_bytes)}</small></td><td>${formatBytes(value.kv_cache_bytes)}</td><td>${model.context_size ?? "—"}</td><td>${formatDuration(value.load_ms)}<small>last req ${formatDuration(value.last_request_elapsed_ms)}</small></td><td>${value.queue_depth}</td><td>${actions}</td></tr>`;
+    return `<tr><td><a href="#model:${escapeHtml(id)}" data-detail-model="${escapeHtml(id)}"><strong>${escapeHtml(model.display_name)}</strong><small>${escapeHtml(id)}</small></a></td><td>${badge(status.label, status.tone)}<small>${escapeHtml(model.admission?.state || "unreviewed")}</small></td><td>${escapeHtml(model.runtime?.adapter || "—")}<small>${escapeHtml(model.runtime?.artifact_class || "")}</small></td><td>${escapeHtml(model.source?.revision || "builtin")}</td><td>${formatBytes(value.loaded_process_ram_bytes)}<small>peak req ${formatBytes(value.peak_request_ram_bytes)}</small></td><td>${formatBytes(value.incremental_vram_bytes)}<small>peak req ${formatBytes(value.peak_request_vram_bytes)}</small></td><td>${formatBytes(value.kv_cache_bytes)}</td><td>${model.context_size ?? "—"}</td><td>${formatDuration(value.load_ms)}<small>last req ${formatDuration(value.last_request_elapsed_ms)}</small></td><td>${value.queue_depth}</td><td>${actions}</td></tr>`;
   }).join("");
   const fleetActions = can("fleet:operate") ? `<div class="toolbar">${actionButton("Start fleet", `data-fleet-op="start"`, "primary")}${actionButton("Reload fleet", `data-fleet-op="reload"`)}${actionButton("Unload all", `data-fleet-op="unload_all"`, "danger")}</div>` : `<span class="readonly-pill">VIEWER</span>`;
   return `${sectionHeading("RESIDENT PLANE", "Fleet state", `<span>${badge(state.snapshot.session.role, "neutral")}</span>`)}
