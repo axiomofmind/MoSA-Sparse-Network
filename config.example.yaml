@@ -11,8 +11,9 @@ paths:
 runtime_executables:
   llama_cpp: llama-server
   transformers: python
+  ocr: python
   embeddings: python
-  # Use the isolated CUDA environment created by scripts/setup_decisions.ps1.
+  # Prefer isolated environments for model runtimes; see README.md and docs/linux.md.
   decisions: python
   # Optional: needed only when a PDF input requests page rendering.
   pdf_renderer: pdftoppm

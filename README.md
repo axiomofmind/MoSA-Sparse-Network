@@ -32,6 +32,10 @@ reference system.
 
 ## Quick start
 
+Using Linux? See [Linux setup and compatibility](docs/linux.md). The Python
+controller and dashboard are portable, but the included `.ps1` launch and
+runtime-setup helpers are Windows-only.
+
 Install Python 3.12 and `uv`, then create the project environment:
 
 ```powershell
