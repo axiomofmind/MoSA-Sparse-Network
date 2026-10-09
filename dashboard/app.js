@@ -670,6 +670,10 @@ function requestConfirmation({ title, phrase, summary, licenseEndpoints = [] }) 
   return new Promise((resolve) => { confirmationResolver = { resolve, phrase, needsLicense: licenseEndpoints.length > 0 }; });
 }
 
+document.querySelector("#confirm-input").addEventListener("input", (event) => {
+  event.currentTarget.setCustomValidity("");
+});
+
 async function runAction(label, callback) {
   state.actionPending = true;
   showBanner(`${label} in progress…`, "warn");
@@ -1286,7 +1290,9 @@ document.querySelector("#confirm-form").addEventListener("submit", (event) => {
   if (!confirmationResolver) return;
   const input = document.querySelector("#confirm-input");
   const license = document.querySelector("#license-confirm");
-  if (input.value !== confirmationResolver.phrase) {
+  const confirmation = input.value.trim();
+  input.setCustomValidity("");
+  if (confirmation !== confirmationResolver.phrase) {
     input.setCustomValidity("The confirmation phrase does not match.");
     input.reportValidity();
     return;
@@ -1299,7 +1305,7 @@ document.querySelector("#confirm-form").addEventListener("submit", (event) => {
   const resolver = confirmationResolver.resolve;
   confirmationResolver = null;
   confirmDialog.close();
-  resolver({ phrase: input.value, licenseAcknowledged: license.checked });
+  resolver({ phrase: confirmation, licenseAcknowledged: license.checked });
 });
 window.addEventListener("hashchange", () => {
   const route = routeFromHash(location.hash);
